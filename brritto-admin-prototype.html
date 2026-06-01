@@ -27,8 +27,6 @@
   --purple-dim: rgba(167,139,250,.1);
   --blue-dim: rgba(77,130,244,.1);
   --blue-border: rgba(77,130,244,.25);
-  --changed: #fb7185;
-  --changed-dim: rgba(251,113,133,.1);
 }
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 html, body { height: 100%; }
@@ -99,7 +97,6 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', sans
 .ev-list { display: flex; flex-direction: column; gap: 2px; }
 .ev-row { background: var(--card); border: 1px solid var(--border); border-radius: 9px; padding: 13px 16px; display: flex; align-items: center; gap: 14px; cursor: pointer; transition: all .18s; }
 .ev-row:hover { border-color: var(--blue-border); background: var(--card2); }
-.ev-row.changed { border-left: 2px solid var(--changed); }
 .ev-main { flex: 1; min-width: 0; }
 .ev-name { font-size: 13.5px; font-weight: 600; color: var(--text); display: flex; align-items: center; gap: 7px; margin-bottom: 4px; }
 .ev-meta { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
@@ -111,7 +108,6 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', sans
 .tag-active { background: var(--green-dim); color: var(--green); border: 1px solid var(--green-border); }
 .tag-p2 { background: var(--purple-dim); color: var(--purple); border: 1px solid rgba(167,139,250,.25); }
 .tag-paused { background: var(--orange-dim); color: var(--orange); border: 1px solid rgba(251,191,36,.25); }
-.tag-changed { background: var(--changed-dim); color: var(--changed); border: 1px solid rgba(251,113,133,.25); }
 .ev-arrow { color: var(--t3); font-size: 14px; flex-shrink: 0; transition: all .15s; }
 .ev-row:hover .ev-arrow { color: var(--accent); transform: translateX(2px); }
 
@@ -165,10 +161,6 @@ textarea { resize: vertical; min-height: 70px; line-height: 1.6; }
 .trig-auto-ico { font-size: 14px; color: var(--green); flex-shrink: 0; margin-top: 1px; }
 .trig-auto-text { font-size: 12.5px; color: var(--t2); line-height: 1.55; }
 .trig-auto-text strong { color: var(--green); font-size: 13px; }
-.trig-changed { background: var(--changed-dim); border: 1px solid rgba(251,113,133,.2); border-radius: 8px; padding: 11px 14px; display: flex; gap: 10px; margin-bottom: 10px; }
-.trig-changed-ico { font-size: 14px; color: var(--changed); flex-shrink: 0; margin-top: 1px; }
-.trig-changed-text { font-size: 12px; color: var(--t2); line-height: 1.55; }
-.trig-changed-text strong { color: var(--changed); }
 .trig-config { border: 1px solid var(--blue-border); border-radius: 8px; padding: 14px; background: var(--blue-dim); }
 .trig-config-lbl { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .6px; color: var(--accent); margin-bottom: 12px; }
 .trig-preview { background: var(--bg); border: 1px solid var(--border); border-radius: 6px; padding: 9px 12px; margin-top: 12px; font-size: 12px; color: var(--t2); line-height: 1.6; }
@@ -454,14 +446,13 @@ let EVENTS = [
     titles:[], bodies:[],
     cta:'ফলাফল দেখো', dl:'brritto://test/{{testId}}/results', phase:'Active', vars:['{{testTitle}}','{{score}}','{{testId}}'] },
 
-  { id:6, cat:'Doubt', name:'Doubt Solved', changed:true, deliveryTarget:'individual',
-    trigType:'auto', autoDesc:'Fires on EVERY single doubt solve — no daily cap removed.',
+  { id:6, cat:'Doubt', name:'Doubt Solved', deliveryTarget:'individual',
+    trigType:'auto', autoDesc:'Fires instantly when a teacher marks a student\'s doubt as solved.',
     aud:['All'], subAud:['All'], style:'Push + Inbox',
     appearTime:'event', scheduleVal:'', scheduleUnit:'hours',
     titles:['তোমার প্রশ্নের উত্তর এসেছে! ✅'],
     bodies:['"{{doubtTitle}}" এর সমাধান পাওয়া গেছে। এখনই দেখো!','তোমার প্রশ্নের জবাব দেওয়া হয়েছে! সমাধান দেখতে ক্লিক করো','সমাধান এসে গেছে! "{{doubtTitle}}" — এখনই পড়ো 📖'],
-    cta:'সমাধান দেখো', dl:'brritto://doubt/{{doubtId}}', phase:'Active', vars:['{{doubtTitle}}','{{doubtId}}'],
-    note:'⚡ CHANGED: Daily cap removed. Every solve triggers a push. Previously max 1/day.' },
+    cta:'সমাধান দেখো', dl:'brritto://doubt/{{doubtId}}', phase:'Active', vars:['{{doubtTitle}}','{{doubtId}}'] },
 
   { id:7, cat:'Live Exam', name:'Live Exam Reminder', changed:false, deliveryTarget:'individual',
     trigType:'config', tc:'exam_hours', tv:{dir:'before', hours:'24'},
@@ -560,10 +551,9 @@ function renderList() {
       const trigSum = ev.trigType==='auto'
         ? `<span class="hig">⚡ Auto</span> — fires when event occurs`
         : `<span class="hi">⚙ Configurable</span> — ${trigSummary(ev)}`;
-      const ch = ev.changed?`<span class="tag tag-changed" style="font-size:10px">⚡ Changed</span>`:'';
-      h+=`<div class="ev-row${ev.changed?' changed':''}" onclick="openEvent(${ev.id})">
+      h+=`<div class="ev-row" onclick="openEvent(${ev.id})">
         <div class="ev-main">
-          <div class="ev-name">${ev.name} ${ch}</div>
+          <div class="ev-name">${ev.name}</div>
           <div class="ev-meta">
             <div class="ev-trig">${trigSum}</div>
           </div>
@@ -617,7 +607,7 @@ function openEvent(id) {
   const cat=CATS[ev.cat]||{icon:'📌'};
   document.getElementById('cfgIcon').textContent=cat.icon;
   document.getElementById('cfgCat').textContent=ev.cat;
-  document.getElementById('cfgName').innerHTML=ev.name+(ev.changed?` <span class="tag tag-changed" style="font-size:12px">⚡ Changed</span>`:'');
+  document.getElementById('cfgName').textContent=ev.name;
   document.getElementById('cfgDesc').textContent=ev.note||'Event name and category are fixed. Configure all notification settings below.';
   buildForm(ev);
   setTimeout(updatePreview,30);
@@ -635,7 +625,7 @@ function buildForm(ev) {
   // Trigger section
   let trigHtml='';
   if(ev.trigType==='auto') {
-    trigHtml=`${ev.changed?`<div class="trig-changed"><span class="trig-changed-ico">⚡</span><div class="trig-changed-text"><strong>Logic Changed from PRD-02:</strong> ${ev.note||''}</div></div>`:''}<div class="trig-auto"><span class="trig-auto-ico">🔄</span><div class="trig-auto-text"><strong>Auto Trigger</strong> &nbsp;—&nbsp; ${ev.autoDesc}</div></div>`;
+    trigHtml=`<div class="trig-auto"><span class="trig-auto-ico">🔄</span><div class="trig-auto-text"><strong>Auto Trigger</strong> &nbsp;—&nbsp; ${ev.autoDesc}</div></div>`;
   } else {
     trigHtml=`<div class="trig-config"><div class="trig-config-lbl">Configure Condition</div>${buildTrigFields(ev)}</div>`;
   }
