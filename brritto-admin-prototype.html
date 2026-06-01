@@ -327,7 +327,7 @@ textarea { resize: vertical; min-height: 70px; line-height: 1.6; }
       <div class="stats-row">
         <div class="stat-card s-blue"><div class="sc-label">Total Events</div><div class="sc-val" id="stT">15</div><div class="sc-sub">All categories</div></div>
         <div class="stat-card s-green"><div class="sc-label">Active</div><div class="sc-val" id="stA">12</div><div class="sc-sub">Live &amp; firing</div></div>
-        <div class="stat-card s-purple"><div class="sc-label">Phase 2</div><div class="sc-val" id="stP">3</div><div class="sc-sub">Planned</div></div>
+        <div class="stat-card s-purple"><div class="sc-label">Changed</div><div class="sc-val" id="stP">1</div><div class="sc-sub">Modified from PRD</div></div>
         <div class="stat-card s-orange"><div class="sc-label">Paused</div><div class="sc-val" id="stPa">0</div><div class="sc-sub">Temporarily off</div></div>
       </div>
       <div id="listBody"></div>
@@ -516,7 +516,7 @@ let EVENTS = [
     appearTime:'set', scheduleVal:'7', scheduleUnit:'days before expiry',
     titles:['সাবস্ক্রিপশন শেষ হচ্ছে! ⚠️'],
     bodies:['তোমার {{packageName}} এর মেয়াদ {{daysLeft}} দিনে শেষ হবে।','{{daysLeft}} দিন বাকি! {{packageName}} নবায়ন করো','সময় শেষ হওয়ার আগেই সাবস্ক্রিপশন নবায়ন করে নাও!'],
-    cta:'নবায়ন করো', dl:'brritto://subscription', phase:'Phase 2', vars:['{{packageName}}','{{daysLeft}}'] },
+    cta:'নবায়ন করো', dl:'brritto://subscription', phase:'Paused', vars:['{{packageName}}','{{daysLeft}}'] },
 
   { id:14, cat:'Subscription', name:'Free Trial Expiry', changed:false, deliveryTarget:'individual',
     trigType:'config', tc:'trial_exp', tv:{days:'3'},
@@ -524,7 +524,7 @@ let EVENTS = [
     appearTime:'set', scheduleVal:'3', scheduleUnit:'days before trial ends',
     titles:['ফ্রি ট্রায়াল শেষ হচ্ছে!'],
     bodies:['তোমার ফ্রি ট্রায়াল {{daysLeft}} দিনে শেষ হবে। এখনই আপগ্রেড করো!','আর মাত্র {{daysLeft}} দিন! প্রিমিয়াম চালিয়ে যেতে সাবস্ক্রাইব করো।'],
-    cta:'প্ল্যান দেখো', dl:'brritto://subscription', phase:'Phase 2', vars:['{{daysLeft}}'] },
+    cta:'প্ল্যান দেখো', dl:'brritto://subscription', phase:'Paused', vars:['{{daysLeft}}'] },
 
   { id:15, cat:'Subscription', name:'Free Trial Offer', changed:false, deliveryTarget:'broadcast',
     trigType:'config', tc:'trial_offer', tv:{days:'7'},
@@ -532,7 +532,7 @@ let EVENTS = [
     appearTime:'set', scheduleVal:'', scheduleUnit:'admin sets send date',
     titles:['ফ্রি ট্রায়াল শুরু করো! 🆓'],
     bodies:['{{trialDays}} দিনের ফ্রি ট্রায়ালে সব কিছু ব্যবহার করো!','বিনামূল্যে {{trialDays}} দিন Brritto Premium ব্যবহার করো!','ফ্রি ট্রায়াল সুযোগ মিস করো না — {{trialDays}} দিন বিনামূল্যে!'],
-    cta:'ফ্রি শুরু করো', dl:'brritto://subscription', phase:'Phase 2', vars:['{{trialDays}}'],
+    cta:'ফ্রি শুরু করো', dl:'brritto://subscription', phase:'Paused', vars:['{{trialDays}}'],
     note:'Manual broadcast — admin sends from Broadcasts panel with a target date.' },
 ];
 
@@ -552,8 +552,8 @@ function renderList() {
       </div>
       <div class="ev-list">`;
     evs.forEach(ev=>{
-      const pt=ev.phase==='Active'?'tag-active':ev.phase==='Phase 2'?'tag-p2':'tag-paused';
-      const pe=ev.phase==='Active'?'● Active':ev.phase==='Phase 2'?'◆ Phase 2':'⏸ Paused';
+      const pt=ev.phase==='Active'?'tag-active':'tag-paused';
+      const pe=ev.phase==='Active'?'● Active':'⏸ Paused';
       const trigSum = ev.trigType==='auto'
         ? `<span class="hig">⚡ Auto</span> — fires when event occurs`
         : `<span class="hi">⚙ Configurable</span> — ${trigSummary(ev)}`;
@@ -579,7 +579,7 @@ function renderList() {
   document.getElementById('listBody').innerHTML=h;
   document.getElementById('stT').textContent=EVENTS.length;
   document.getElementById('stA').textContent=EVENTS.filter(e=>e.phase==='Active').length;
-  document.getElementById('stP').textContent=EVENTS.filter(e=>e.phase==='Phase 2').length;
+  document.getElementById('stP').textContent=EVENTS.filter(e=>e.changed).length;
   document.getElementById('stPa').textContent=EVENTS.filter(e=>e.phase==='Paused').length;
 }
 
@@ -748,7 +748,6 @@ function buildForm(ev) {
         <span class="phase-label">Status</span>
         <div class="phase-tgl">
           <button class="ph-btn${ev.phase==='Active'?' on-a':''}" onclick="setPhase('Active')">Active</button>
-          <button class="ph-btn${ev.phase==='Phase 2'?' on-p2':''}" onclick="setPhase('Phase 2')">Phase 2</button>
           <button class="ph-btn${ev.phase==='Paused'?' on-pause':''}" onclick="setPhase('Paused')">Paused</button>
         </div>
       </div>
@@ -1258,7 +1257,6 @@ function setPhase(p) {
   document.querySelectorAll('.ph-btn').forEach(b=>{b.className='ph-btn';});
   document.querySelectorAll('.ph-btn').forEach(b=>{
     if(b.textContent==='Active'&&p==='Active') b.classList.add('on-a');
-    if(b.textContent==='Phase 2'&&p==='Phase 2') b.classList.add('on-p2');
     if(b.textContent==='Paused'&&p==='Paused') b.classList.add('on-pause');
   });
 }
