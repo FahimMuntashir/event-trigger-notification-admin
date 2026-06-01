@@ -1,0 +1,1377 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Brritto Admin — Event Trigger Notifications</title>
+<style>
+:root {
+  --bg: #0c1620;
+  --sb: #0f1e30;
+  --card: #12202f;
+  --card2: #162435;
+  --border: #1b2f47;
+  --border2: #233a56;
+  --accent: #4d82f4;
+  --text: #dce9f8;
+  --t2: #6b8aaa;
+  --t3: #3d5570;
+  --green: #34d399;
+  --green-dim: rgba(52,211,153,.1);
+  --green-border: rgba(52,211,153,.25);
+  --orange: #fbbf24;
+  --orange-dim: rgba(251,191,36,.08);
+  --red: #f87171;
+  --red-dim: rgba(248,113,113,.1);
+  --purple: #a78bfa;
+  --purple-dim: rgba(167,139,250,.1);
+  --blue-dim: rgba(77,130,244,.1);
+  --blue-border: rgba(77,130,244,.25);
+  --changed: #fb7185;
+  --changed-dim: rgba(251,113,133,.1);
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { height: 100%; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); display: flex; height: 100vh; overflow: hidden; font-size: 13.5px; -webkit-font-smoothing: antialiased; }
+
+/* ─── SCROLLBAR ─── */
+::-webkit-scrollbar { width: 4px; } ::-webkit-scrollbar-track { background: transparent; } ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+
+/* ─── SIDEBAR ─── */
+.sb { width: 210px; min-width: 210px; background: var(--sb); border-right: 1px solid var(--border); display: flex; flex-direction: column; overflow-y: auto; }
+.sb-head { padding: 18px 16px 14px; border-bottom: 1px solid var(--border); }
+.sb-logo { display: flex; align-items: center; gap: 10px; }
+.logo-mark { width: 28px; height: 28px; background: linear-gradient(135deg, var(--accent), #818cf8); border-radius: 7px; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 11px; color: #fff; letter-spacing: -1px; flex-shrink: 0; }
+.logo-text { font-weight: 700; font-size: 14px; line-height: 1.2; }
+.logo-ver { font-size: 10px; color: var(--t3); margin-top: 1px; }
+.sb-nav { flex: 1; padding: 8px 0; }
+.nav-item { display: flex; align-items: center; gap: 9px; padding: 8px 16px; color: var(--t2); cursor: pointer; font-size: 12.5px; transition: color .15s, background .15s; user-select: none; }
+.nav-item:hover { background: rgba(255,255,255,.03); color: var(--text); }
+.nav-item .ni { width: 15px; text-align: center; font-size: 12px; opacity: .7; flex-shrink: 0; }
+.nav-item .arr { margin-left: auto; font-size: 10px; color: var(--t3); transition: transform .2s; }
+.nav-item.open .arr { transform: rotate(90deg); }
+.sub { display: none; } .sub.open { display: block; }
+.sub-item { display: flex; align-items: center; gap: 7px; padding: 7px 16px 7px 34px; color: var(--t3); cursor: pointer; font-size: 12px; transition: all .15s; }
+.sub-item:hover { color: var(--t2); }
+.sub-item.on { color: var(--accent); font-weight: 600; background: rgba(77,130,244,.06); border-right: 2px solid var(--accent); }
+.sub-dot { width: 4px; height: 4px; border-radius: 50%; background: currentColor; flex-shrink: 0; }
+.sb-footer { padding: 12px 16px; border-top: 1px solid var(--border); }
+.user-row { display: flex; align-items: center; gap: 9px; }
+.user-av { width: 27px; height: 27px; border-radius: 50%; background: linear-gradient(135deg, var(--accent), #818cf8); display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 700; color: #fff; flex-shrink: 0; }
+.user-name { font-size: 12px; font-weight: 600; } .user-role { font-size: 10px; color: var(--t3); }
+
+/* ─── TOPBAR ─── */
+.main { flex: 1; display: flex; flex-direction: column; overflow: hidden; min-width: 0; }
+.topbar { background: var(--sb); border-bottom: 1px solid var(--border); padding: 0 24px; height: 52px; display: flex; align-items: center; justify-content: space-between; flex-shrink: 0; }
+.tb-l { display: flex; flex-direction: column; }
+.tb-bc { font-size: 11px; color: var(--t3); margin-bottom: 2px; }
+.tb-title { font-size: 15px; font-weight: 700; }
+.tb-r { display: flex; align-items: center; gap: 8px; }
+.btn { display: inline-flex; align-items: center; gap: 6px; padding: 7px 14px; border-radius: 7px; font-size: 12.5px; font-weight: 600; cursor: pointer; border: none; transition: all .15s; font-family: inherit; }
+.btn-accent { background: var(--accent); color: #fff; } .btn-accent:hover { background: #3d72e4; }
+.btn-outline { background: transparent; color: var(--t2); border: 1px solid var(--border); } .btn-outline:hover { background: var(--card); color: var(--text); }
+.btn-save { background: var(--green-dim); color: var(--green); border: 1px solid var(--green-border); } .btn-save:hover { background: rgba(52,211,153,.18); }
+.btn-sm { padding: 5px 11px; font-size: 12px; }
+.ico-btn { width: 32px; height: 32px; border-radius: 7px; background: var(--card); border: 1px solid var(--border); display: flex; align-items: center; justify-content: center; cursor: pointer; color: var(--t2); font-size: 13px; transition: all .15s; }
+.ico-btn:hover { color: var(--text); }
+
+/* ─── SCREEN ─── */
+.screen { flex: 1; overflow-y: auto; padding: 22px 24px; }
+
+/* ─── EVENT LIST ─── */
+.stats-row { display: grid; grid-template-columns: repeat(4,1fr); gap: 10px; margin-bottom: 22px; }
+.stat-card { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 14px 16px; }
+.sc-label { font-size: 10px; color: var(--t3); text-transform: uppercase; letter-spacing: .6px; margin-bottom: 8px; }
+.sc-val { font-size: 24px; font-weight: 800; line-height: 1; }
+.sc-sub { font-size: 11px; color: var(--t3); margin-top: 4px; }
+.stat-card.s-blue .sc-val { color: var(--accent); }
+.stat-card.s-green .sc-val { color: var(--green); }
+.stat-card.s-purple .sc-val { color: var(--purple); }
+.stat-card.s-orange .sc-val { color: var(--orange); }
+
+.cat-block { margin-bottom: 24px; }
+.cat-row { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
+.cat-ico { font-size: 14px; }
+.cat-lbl { font-size: 11.5px; font-weight: 700; color: var(--t2); }
+.cat-n { font-size: 10.5px; color: var(--t3); background: var(--card); border: 1px solid var(--border); border-radius: 8px; padding: 1px 7px; }
+.cat-line { flex: 1; height: 1px; background: var(--border); }
+
+.ev-list { display: flex; flex-direction: column; gap: 2px; }
+.ev-row { background: var(--card); border: 1px solid var(--border); border-radius: 9px; padding: 13px 16px; display: flex; align-items: center; gap: 14px; cursor: pointer; transition: all .18s; }
+.ev-row:hover { border-color: var(--blue-border); background: var(--card2); }
+.ev-row.changed { border-left: 2px solid var(--changed); }
+.ev-main { flex: 1; min-width: 0; }
+.ev-name { font-size: 13.5px; font-weight: 600; color: var(--text); display: flex; align-items: center; gap: 7px; margin-bottom: 4px; }
+.ev-meta { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+.ev-trig { font-size: 11.5px; color: var(--t3); }
+.ev-trig .hi { color: var(--accent); }
+.ev-trig .hig { color: var(--green); }
+.tag { display: inline-flex; align-items: center; padding: 2px 8px; border-radius: 5px; font-size: 11px; font-weight: 600; white-space: nowrap; }
+.tag-style { background: var(--card2); border: 1px solid var(--border); color: var(--t2); }
+.tag-active { background: var(--green-dim); color: var(--green); border: 1px solid var(--green-border); }
+.tag-p2 { background: var(--purple-dim); color: var(--purple); border: 1px solid rgba(167,139,250,.25); }
+.tag-paused { background: var(--orange-dim); color: var(--orange); border: 1px solid rgba(251,191,36,.25); }
+.tag-changed { background: var(--changed-dim); color: var(--changed); border: 1px solid rgba(251,113,133,.25); }
+.ev-arrow { color: var(--t3); font-size: 14px; flex-shrink: 0; transition: all .15s; }
+.ev-row:hover .ev-arrow { color: var(--accent); transform: translateX(2px); }
+
+/* ─── CONFIG VIEW ─── */
+.cfg-view { display: none; flex-direction: column; }
+.cfg-view.on { display: flex; }
+.cfg-bc { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--t3); margin-bottom: 18px; cursor: pointer; transition: color .15s; width: fit-content; }
+.cfg-bc:hover { color: var(--t2); }
+.cfg-ev-header { margin-bottom: 22px; }
+.cfg-ev-cat { font-size: 11px; color: var(--t3); text-transform: uppercase; letter-spacing: .7px; margin-bottom: 6px; }
+.cfg-ev-name { font-size: 20px; font-weight: 800; display: flex; align-items: center; gap: 10px; margin-bottom: 5px; }
+.cfg-ev-desc { font-size: 12.5px; color: var(--t2); max-width: 600px; line-height: 1.5; }
+
+.cfg-layout { display: grid; grid-template-columns: 1fr 264px; gap: 18px; align-items: start; }
+
+/* ─── FORM ─── */
+.form-body { display: flex; flex-direction: column; gap: 12px; }
+.f-card { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 18px 20px; }
+.f-sect { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .8px; color: var(--t3); margin-bottom: 16px; display: flex; align-items: center; gap: 8px; }
+.f-sect::after { content:''; flex:1; height:1px; background:var(--border); }
+.f-group { margin-bottom: 14px; }
+.f-group:last-child { margin-bottom: 0; }
+.f-row { display: grid; gap: 12px; } .f-row.c2 { grid-template-columns: 1fr 1fr; } .f-row.c3 { grid-template-columns: 1fr 1fr 1fr; }
+.f-label { font-size: 11.5px; font-weight: 600; color: var(--t2); display: block; margin-bottom: 6px; }
+.f-label .opt { font-weight: 400; color: var(--t3); margin-left: 4px; }
+input[type=text], input[type=number], select, textarea { background: var(--bg); border: 1px solid var(--border); border-radius: 7px; padding: 9px 11px; color: var(--text); font-size: 13px; outline: none; transition: border-color .15s; width: 100%; font-family: inherit; }
+input:focus, select:focus, textarea:focus { border-color: var(--accent); }
+select { cursor: pointer; } select option { background: var(--card); }
+textarea { resize: vertical; min-height: 70px; line-height: 1.6; }
+.f-hint { font-size: 11px; color: var(--t3); margin-top: 5px; line-height: 1.5; }
+.f-hint code { background: var(--card2); border: 1px solid var(--border); padding: 1px 5px; border-radius: 4px; font-size: 10.5px; color: var(--accent); }
+.f-hint.warn { color: var(--orange); } .f-hint.good { color: var(--green); }
+
+/* PILLS */
+.pill-row { display: flex; flex-wrap: wrap; gap: 6px; }
+.pill { padding: 5px 12px; border-radius: 18px; font-size: 12px; cursor: pointer; border: 1px solid var(--border); color: var(--t2); background: transparent; transition: all .15s; user-select: none; }
+.pill:hover { border-color: var(--blue-border); color: var(--text); }
+.pill.on { background: var(--blue-dim); border-color: var(--accent); color: var(--accent); font-weight: 600; }
+
+/* TOGGLE */
+.toggle { display: flex; background: var(--bg); border: 1px solid var(--border); border-radius: 7px; overflow: hidden; }
+.tgl { flex: 1; padding: 8px 10px; text-align: center; cursor: pointer; font-size: 12.5px; font-weight: 600; color: var(--t2); border: none; background: none; font-family: inherit; transition: all .15s; white-space: nowrap; }
+.tgl.on { background: var(--accent); color: #fff; }
+.tgl.on-set { background: rgba(251,191,36,.15); color: var(--orange); }
+
+/* TRIGGER BOX */
+.trig-auto { background: var(--green-dim); border: 1px solid var(--green-border); border-radius: 8px; padding: 12px 14px; display: flex; gap: 10px; }
+.trig-auto-ico { font-size: 14px; color: var(--green); flex-shrink: 0; margin-top: 1px; }
+.trig-auto-text { font-size: 12.5px; color: var(--t2); line-height: 1.55; }
+.trig-auto-text strong { color: var(--green); font-size: 13px; }
+.trig-changed { background: var(--changed-dim); border: 1px solid rgba(251,113,133,.2); border-radius: 8px; padding: 11px 14px; display: flex; gap: 10px; margin-bottom: 10px; }
+.trig-changed-ico { font-size: 14px; color: var(--changed); flex-shrink: 0; margin-top: 1px; }
+.trig-changed-text { font-size: 12px; color: var(--t2); line-height: 1.55; }
+.trig-changed-text strong { color: var(--changed); }
+.trig-config { border: 1px solid var(--blue-border); border-radius: 8px; padding: 14px; background: var(--blue-dim); }
+.trig-config-lbl { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .6px; color: var(--accent); margin-bottom: 12px; }
+.trig-preview { background: var(--bg); border: 1px solid var(--border); border-radius: 6px; padding: 9px 12px; margin-top: 12px; font-size: 12px; color: var(--t2); line-height: 1.6; }
+.trig-preview .b { background: rgba(77,130,244,.18); color: var(--accent); padding: 2px 7px; border-radius: 4px; font-weight: 700; }
+
+/* VARIANTS */
+.variants { display: flex; flex-direction: column; gap: 7px; margin-bottom: 8px; }
+.var-row { display: flex; gap: 7px; align-items: flex-start; }
+.var-n { min-width: 20px; height: 20px; border-radius: 5px; background: var(--card2); border: 1px solid var(--border); display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 700; color: var(--t3); margin-top: 10px; flex-shrink: 0; }
+.var-del { width: 26px; height: 26px; flex-shrink: 0; margin-top: 9px; border-radius: 5px; background: transparent; border: 1px solid transparent; color: var(--t3); cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 12px; transition: all .15s; }
+.var-del:hover { background: var(--red-dim); border-color: rgba(248,113,113,.25); color: var(--red); }
+.add-var { display: inline-flex; align-items: center; gap: 6px; color: var(--accent); font-size: 12px; font-weight: 600; cursor: pointer; padding: 5px 0; opacity: .8; transition: opacity .15s; }
+.add-var:hover { opacity: 1; }
+
+/* VAR CHIPS */
+.chip-row { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 7px; }
+.chip { background: var(--card2); border: 1px solid var(--border); border-radius: 5px; padding: 2px 8px; font-size: 11px; color: var(--t2); cursor: pointer; font-family: 'Fira Code', monospace; transition: all .15s; }
+.chip:hover { border-color: var(--accent); color: var(--accent); background: var(--blue-dim); }
+
+/* LEARN MILESTONE RULE CARDS */
+.lr-card { background: var(--bg); border: 1px solid var(--border); border-radius: 9px; margin-bottom: 10px; overflow: hidden; }
+.lr-head { display: flex; align-items: center; gap: 10px; padding: 9px 13px; background: var(--card2); border-bottom: 1px solid var(--border); }
+.lr-badge { font-size: 10px; font-weight: 700; color: var(--t3); background: var(--card); border: 1px solid var(--border); border-radius: 5px; padding: 2px 8px; flex-shrink: 0; }
+.lr-summary { font-size: 12px; color: var(--t2); flex: 1; }
+.lr-summary b { color: var(--accent); }
+.lr-del-btn { width: 22px; height: 22px; border-radius: 5px; display: flex; align-items: center; justify-content: center; font-size: 12px; color: var(--t3); cursor: pointer; border: 1px solid transparent; transition: all .15s; flex-shrink: 0; }
+.lr-del-btn:hover { background: var(--red-dim); border-color: rgba(248,113,113,.25); color: var(--red); }
+.lr-body { padding: 14px; }
+.lr-trigger-row { display: grid; grid-template-columns: 90px 1fr; gap: 10px; margin-bottom: 14px; padding-bottom: 14px; border-bottom: 1px solid var(--border); }
+.lr-sect { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .6px; color: var(--t3); margin-bottom: 8px; }
+.lr-var-list { display: flex; flex-direction: column; gap: 6px; margin-bottom: 7px; }
+.lr-var-row { display: flex; gap: 6px; align-items: flex-start; }
+.lr-var-n { min-width: 18px; height: 18px; border-radius: 4px; background: var(--card2); border: 1px solid var(--border); display: flex; align-items: center; justify-content: center; font-size: 9px; font-weight: 700; color: var(--t3); margin-top: 9px; flex-shrink: 0; }
+.lr-var-del { width: 24px; height: 24px; flex-shrink: 0; margin-top: 8px; border-radius: 5px; background: transparent; border: 1px solid transparent; color: var(--t3); cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 11px; transition: all .15s; }
+.lr-var-del:hover { background: var(--red-dim); border-color: rgba(248,113,113,.25); color: var(--red); }
+.lr-var-list textarea { min-height: 52px; font-size: 12.5px; }
+
+/* APPEAR TIME */
+.appear-row { display: none; margin-top: 12px; }
+.appear-row.show { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+
+/* DELIVERY TARGET */
+.dt-info { display: flex; gap: 10px; border-radius: 8px; padding: 11px 14px; margin-bottom: 14px; }
+.dt-info.ind  { background: var(--blue-dim);   border: 1px solid var(--blue-border); }
+.dt-info.bcast{ background: var(--orange-dim); border: 1px solid rgba(251,191,36,.25); }
+.dt-ico { font-size: 15px; flex-shrink: 0; margin-top: 1px; }
+.dt-text { font-size: 12.5px; color: var(--t2); line-height: 1.55; }
+.dt-text strong { font-size: 13px; }
+.dt-info.ind  .dt-text strong { color: var(--accent); }
+.dt-info.bcast .dt-text strong { color: var(--orange); }
+
+/* ─── SAVE BAR ─── */
+.save-bar { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 14px 20px; display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.phase-row { display: flex; align-items: center; gap: 10px; }
+.phase-label { font-size: 11px; color: var(--t3); font-weight: 600; }
+.phase-tgl { display: flex; gap: 0; background: var(--bg); border: 1px solid var(--border); border-radius: 7px; overflow: hidden; }
+.ph-btn { padding: 7px 13px; font-size: 12px; font-weight: 600; cursor: pointer; border: none; background: none; color: var(--t2); font-family: inherit; transition: all .15s; }
+.ph-btn.on-a { background: var(--green-dim); color: var(--green); }
+.ph-btn.on-p2 { background: var(--purple-dim); color: var(--purple); }
+.ph-btn.on-pause { background: var(--orange-dim); color: var(--orange); }
+
+/* ─── PREVIEW ─── */
+.preview-panel { position: sticky; top: 0; }
+.pv-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .7px; color: var(--t3); margin-bottom: 10px; }
+.phone-wrap { background: #10131f; border: 1.5px solid #1e2240; border-radius: 24px; padding: 10px 8px; margin-bottom: 10px; }
+.ph-bar { display: flex; justify-content: space-between; padding: 0 4px 8px; font-size: 9px; color: #3a4060; }
+
+.pv-push { background: #1a1d30; border-radius: 12px; padding: 12px 13px; margin-bottom: 5px; }
+.pv-push-top { display: flex; align-items: center; gap: 7px; margin-bottom: 8px; }
+.pv-app-ico { width: 17px; height: 17px; border-radius: 4px; background: linear-gradient(135deg,var(--accent),#818cf8); display: flex; align-items: center; justify-content: center; font-size: 8px; font-weight: 800; color: #fff; }
+.pv-app-name { font-size: 10px; color: #555577; font-weight: 600; }
+.pv-app-time { margin-left: auto; font-size: 9px; color: #444466; }
+.pv-push-title { font-size: 12.5px; font-weight: 700; color: #d0d8f0; margin-bottom: 3px; line-height: 1.3; }
+.pv-push-body { font-size: 11px; color: #7080a0; line-height: 1.45; }
+.pv-cta { margin-top: 9px; background: var(--accent); border-radius: 7px; padding: 7px 12px; text-align: center; font-size: 11.5px; font-weight: 700; color: #fff; }
+
+.pv-splash { background: linear-gradient(160deg,#080e1a,#111e3a); border-radius: 12px; padding: 26px 16px; text-align: center; margin-bottom: 5px; }
+.pv-splash-e { font-size: 36px; margin-bottom: 10px; }
+.pv-splash-t { font-size: 14px; font-weight: 800; color: #ccd8f0; margin-bottom: 7px; line-height: 1.3; }
+.pv-splash-b { font-size: 11px; color: #6070a0; line-height: 1.5; margin-bottom: 14px; }
+.pv-splash-cta { background: linear-gradient(135deg, var(--accent), #818cf8); border-radius: 9px; padding: 10px 22px; font-size: 12px; font-weight: 700; color: #fff; display: inline-block; }
+
+.pv-toast { background: #1a1d30; border-radius: 12px; padding: 11px 14px; display: flex; align-items: center; gap: 9px; margin-bottom: 5px; }
+.pv-toast-txt { font-size: 12px; color: #bbc0e0; font-weight: 600; flex: 1; }
+.pv-toast-sub { font-size: 10px; color: #555577; margin-top: 2px; }
+
+.pv-meta { background: var(--card); border: 1px solid var(--border); border-radius: 9px; padding: 12px; }
+.pv-meta-row { display: flex; justify-content: space-between; align-items: flex-start; padding: 5px 0; border-bottom: 1px solid var(--border); }
+.pv-meta-row:last-child { border: none; }
+.pv-mk { font-size: 11px; color: var(--t3); }
+.pv-mv { font-size: 11px; color: var(--text); font-weight: 600; text-align: right; max-width: 145px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.pv-mv.g { color: var(--green); } .pv-mv.o { color: var(--orange); } .pv-mv.p { color: var(--purple); }
+
+/* TOAST */
+.toast { position: fixed; bottom: 20px; right: 20px; background: var(--card2); border: 1px solid var(--border); border-radius: 9px; padding: 11px 16px; font-size: 13px; font-weight: 600; z-index: 999; display: flex; align-items: center; gap: 8px; transform: translateY(80px); opacity: 0; transition: all .28s; }
+.toast.show { transform: translateY(0); opacity: 1; }
+.toast.ok { border-color: var(--green-border); }
+.toast.ok .ti { color: var(--green); }
+.toast.err { border-color: rgba(248,113,113,.3); }
+.toast.err .ti { color: var(--red); }
+</style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<aside class="sb">
+  <div class="sb-head">
+    <div class="sb-logo">
+      <div class="logo-mark">br</div>
+      <div><div class="logo-text">brritto</div><div class="logo-ver">v2.10.0</div></div>
+    </div>
+  </div>
+  <nav class="sb-nav">
+    <div class="nav-item"><span class="ni">📊</span> Dashboard</div>
+    <div class="nav-item"><span class="ni">📚</span> Program Management <span class="arr">›</span></div>
+    <div class="nav-item"><span class="ni">✏️</span> MCQ <span class="arr">›</span></div>
+    <div class="nav-item"><span class="ni">🎓</span> Live Exam <span class="arr">›</span></div>
+    <div class="nav-item"><span class="ni">👥</span> Users Management <span class="arr">›</span></div>
+    <div class="nav-item"><span class="ni">⚙️</span> Academic Setup <span class="arr">›</span></div>
+    <div class="nav-item"><span class="ni">📝</span> Content Management <span class="arr">›</span></div>
+    <div class="nav-item open" onclick="this.classList.toggle('open');this.nextElementSibling.classList.toggle('open')">
+      <span class="ni">📢</span> Announcement &amp; Feed <span class="arr">›</span>
+    </div>
+    <div class="sub open">
+      <div class="sub-item"><span class="sub-dot"></span> Notice Management</div>
+      <div class="sub-item"><span class="sub-dot"></span> Feedback</div>
+      <div class="sub-item"><span class="sub-dot"></span> Notification</div>
+      <div class="sub-item"><span class="sub-dot"></span> Contact Us</div>
+      <div class="sub-item on"><span class="sub-dot"></span> Event Trigger Notifications</div>
+    </div>
+    <div class="nav-item"><span class="ni">🔧</span> App &amp; System Config <span class="arr">›</span></div>
+    <div class="nav-item"><span class="ni">💎</span> Subscription &amp; Packages <span class="arr">›</span></div>
+  </nav>
+  <div class="sb-footer">
+    <div class="user-row">
+      <div class="user-av">FM</div>
+      <div><div class="user-name">Fahim Muntashir</div><div class="user-role">Super Admin</div></div>
+    </div>
+  </div>
+</aside>
+
+<!-- MAIN -->
+<div class="main">
+  <div class="topbar">
+    <div class="tb-l">
+      <div class="tb-bc" id="tbBc">Announcement &amp; Feed  ›  Event Trigger Notifications</div>
+      <div class="tb-title" id="tbTitle">Event Trigger Notifications</div>
+    </div>
+    <div class="tb-r">
+      <div class="ico-btn" title="Refresh">↻</div>
+      <div id="tbExtra"></div>
+    </div>
+  </div>
+
+  <div class="screen" id="screen">
+
+    <!-- LIST VIEW -->
+    <div id="viewList">
+      <div class="stats-row">
+        <div class="stat-card s-blue"><div class="sc-label">Total Events</div><div class="sc-val" id="stT">15</div><div class="sc-sub">All categories</div></div>
+        <div class="stat-card s-green"><div class="sc-label">Active</div><div class="sc-val" id="stA">12</div><div class="sc-sub">Live &amp; firing</div></div>
+        <div class="stat-card s-purple"><div class="sc-label">Phase 2</div><div class="sc-val" id="stP">3</div><div class="sc-sub">Planned</div></div>
+        <div class="stat-card s-orange"><div class="sc-label">Paused</div><div class="sc-val" id="stPa">0</div><div class="sc-sub">Temporarily off</div></div>
+      </div>
+      <div id="listBody"></div>
+    </div>
+
+    <!-- CONFIG VIEW -->
+    <div id="viewCfg" class="cfg-view">
+      <div class="cfg-bc" onclick="goList()">← All Events</div>
+      <div class="cfg-ev-header">
+        <div class="cfg-ev-cat" id="cfgCat"></div>
+        <div class="cfg-ev-name" id="cfgName"></div>
+        <div class="cfg-ev-desc" id="cfgDesc"></div>
+      </div>
+      <div class="cfg-layout">
+        <div class="form-body" id="cfgForm"></div>
+        <div class="preview-panel">
+          <div class="pv-label">Live Preview</div>
+          <div class="phone-wrap">
+            <div class="ph-bar"><span>9:41</span><span>● ● ●  🔋</span></div>
+            <div id="pvBox"></div>
+          </div>
+          <div class="pv-meta">
+            <div class="pv-meta-row"><span class="pv-mk">Style</span><span class="pv-mv" id="pvStyle">—</span></div>
+            <div class="pv-meta-row"><span class="pv-mk">Audience</span><span class="pv-mv" id="pvAud">All</span></div>
+            <div class="pv-meta-row"><span class="pv-mk">Timing</span><span class="pv-mv" id="pvTime">—</span></div>
+            <div class="pv-meta-row"><span class="pv-mk">Deep Link</span><span class="pv-mv" id="pvDL">—</span></div>
+            <div class="pv-meta-row"><span class="pv-mk">Body Variants</span><span class="pv-mv" id="pvVC">—</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<div class="toast" id="toast"><span class="ti" id="ti">✓</span><span id="tm">Saved</span></div>
+
+<script>
+// ═══════════════════════ DATA ═══════════════════════
+const DL_OPTIONS = [
+  {g:'Home',o:[['brritto://home','Home Dashboard']]},
+  {g:'Course',o:[['brritto://courses','Course List'],['brritto://course/{{courseId}}','Course Detail'],['brritto://course/{{courseId}}/certificate','Certificate']]},
+  {g:'Live Exam',o:[['brritto://live-exams','All Live Exams'],['brritto://live-exams/upcoming','Upcoming Exams'],['brritto://live-exam/{{examId}}','Exam Detail / Join'],['brritto://live-exam/{{examId}}/results','Exam Results']]},
+  {g:'Test & Doubt',o:[['brritto://test/{{testId}}/results','Test Results'],['brritto://doubt/{{doubtId}}','Doubt Detail']]},
+  {g:'Profile & Settings',o:[['brritto://profile/edit','Edit Profile'],['brritto://settings/notifications','Notification Settings']]},
+  {g:'Subscription',o:[['brritto://subscription','Subscription / Upgrade']]},
+  {g:'Other',o:[['brritto://mcq-bank','MCQ Bank'],['brritto://scan','QR Scan'],['brritto://feature-update','Feature Update']]},
+];
+
+const CATS = {
+  Onboarding: { icon:'👋', color:'var(--accent)' },
+  Learn:       { icon:'📖', color:'var(--green)' },
+  Test:        { icon:'📝', color:'var(--orange)' },
+  Doubt:       { icon:'❓', color:'var(--changed)' },
+  'Live Exam': { icon:'🎓', color:'var(--purple)' },
+  Course:      { icon:'🎒', color:'var(--green)' },
+  Retention:   { icon:'💔', color:'var(--red)' },
+  Subscription:{ icon:'💎', color:'var(--purple)' },
+};
+
+let EVENTS = [
+  { id:1, cat:'Onboarding', name:'Welcome / Sign-up', changed:false, deliveryTarget:'individual',
+    trigType:'auto', autoDesc:'Fires instantly when a student completes signup. No condition to configure.',
+    aud:['All'], subAud:['All'], style:'Splash Screen + Push',
+    appearTime:'event', scheduleVal:'', scheduleUnit:'hours',
+    titles:['Welcome to Brritto, {{student_name}}! 🎉'],
+    bodies:['হাই {{student_name}}, Brritto-তে স্বাগতম! 🎉 চলো, পড়াশোনাকে সহজ করি।','তোমাকে পেয়ে আমরা খুশি! পড়াশোনা শুরু করতে প্রস্তুত?','Brritto-তে তোমার যাত্রা শুরু হোক আজই! 🚀'],
+    cta:'Start Learning', dl:'brritto://home', phase:'Active',
+    vars:['{{student_name}}'] },
+
+  { id:2, cat:'Onboarding', name:'Profile Incomplete Reminder', changed:false, deliveryTarget:'individual',
+    trigType:'config', tc:'days_signup', tv:{days:'1'},
+    aud:['All'], subAud:['All'], style:'Push + Inbox',
+    appearTime:'set', scheduleVal:'1', scheduleUnit:'days after signup',
+    titles:['প্রোফাইল অসম্পূর্ণ রয়েছে ⚠️'],
+    bodies:['কিছু তথ্য দিতে বাকি আছে। প্রোফাইল সম্পন্ন করো!','প্রোফাইল শেষ করলে কোর্সে ভর্তি হওয়া সহজ হবে!','মাত্র কয়েক সেকেন্ড লাগবে — প্রোফাইল সম্পন্ন করো!'],
+    cta:'প্রোফাইল আপডেট', dl:'brritto://profile/edit', phase:'Active', vars:[] },
+
+  { id:3, cat:'Onboarding', name:'Profile Completion Confirmed', changed:false, deliveryTarget:'individual',
+    trigType:'auto', autoDesc:'Fires instantly when all required profile fields are filled.',
+    aud:['All'], subAud:['Package'], style:'Push + Inbox',
+    appearTime:'event', scheduleVal:'', scheduleUnit:'hours',
+    titles:['প্রোফাইল সম্পন্ন! ✅'],
+    bodies:['তোমার প্রোফাইল তৈরি হয়েছে। এখন পড়াশোনা শুরু করো!','সব তথ্য দেওয়া হয়ে গেছে। কোর্স বেছে নাও!'],
+    cta:'হোমে যাও', dl:'brritto://home', phase:'Active', vars:[] },
+
+  { id:4, cat:'Learn', name:'Learn Activity Toast', changed:false, deliveryTarget:'individual',
+    trigType:'config', tc:'learn',
+    tv:{ rules:[
+      { count:'5', type:'Correct / Wrong / Attempts',
+        titles:['🔥 দারুণ করছ!', '⭐ অসাধারণ!'],
+        bodies:['🔥 {{count}} টি সঠিক উত্তর! দারুণ করছ!','একটানা {{count}} টি! চালিয়ে যাও 💪'] },
+      { count:'10', type:'Correct / Wrong / Attempts',
+        titles:['একটানা {{count}} টি! 🎯'],
+        bodies:['একটানা {{count}} টি সঠিক! চালিয়ে যাও!','{{count}} টি প্রশ্ন শেষ! 🎯 আরও এগিয়ে যাও!','তুমি দারুণ করছ! {{count}} পর্যন্ত এলে 🚀'] },
+      { count:'20', type:'Correct / Wrong / Attempts',
+        titles:['WOW! {{count}} টি! 🏆'],
+        bodies:['অবিশ্বাস্য! {{count}} টি একটানা! তুমি আজ আগুন 🔥','{{count}} পর্যন্ত গেছ! তোমাকে আটকায় কে! 🏆'] },
+    ]},
+    aud:['Admission'], subAud:['Course'], style:'In-App Toast',
+    appearTime:'event', scheduleVal:'', scheduleUnit:'hours',
+    titles:[], bodies:[],
+    cta:'', dl:'brritto://courses', phase:'Active', vars:['{{count}}'],
+    note:'Toast only — no title shown to student. Each milestone rule fires its own random message.' },
+
+  { id:5, cat:'Test', name:'Test Result Notification', changed:false, deliveryTarget:'individual',
+    trigType:'config', tc:'test_score',
+    tv:{ rules:[
+      { op:'>=', score:'80',
+        titles:['{{testTitle}} — অসাধারণ! 🏆'],
+        bodies:['তুমি {{score}}% পেয়েছ! অসাধারণ 🏆','দারুণ ফলাফল! {{score}}% পেয়েছ। এভাবে চালিয়ে যাও!'] },
+      { op:'>=', score:'50',
+        titles:['{{testTitle}} — ভালো চেষ্টা! 📝'],
+        bodies:['{{score}}% — দারুণ চেষ্টা! আরও পড়লে আরও ভালো হবে','এবার {{score}}% পেয়েছ। আবার দিলে আরও ভালো করবে! 💪'] },
+      { op:'>=', score:'30',
+        titles:['{{testTitle}} — ফলাফল এসেছে 📝'],
+        bodies:['তুমি {{score}}% পেয়েছ। হাল ছেড়ো না, চেষ্টা চালিয়ে যাও!','{{score}}% পেয়েছ — আরেকবার দাও, পারবে! 💪'] },
+    ]},
+    aud:['All'], subAud:['All'], style:'Splash Screen',
+    appearTime:'event', scheduleVal:'', scheduleUnit:'hours',
+    titles:[], bodies:[],
+    cta:'ফলাফল দেখো', dl:'brritto://test/{{testId}}/results', phase:'Active', vars:['{{testTitle}}','{{score}}','{{testId}}'] },
+
+  { id:6, cat:'Doubt', name:'Doubt Solved', changed:true, deliveryTarget:'individual',
+    trigType:'auto', autoDesc:'Fires on EVERY single doubt solve — no daily cap removed.',
+    aud:['All'], subAud:['All'], style:'Push + Inbox',
+    appearTime:'event', scheduleVal:'', scheduleUnit:'hours',
+    titles:['তোমার প্রশ্নের উত্তর এসেছে! ✅'],
+    bodies:['"{{doubtTitle}}" এর সমাধান পাওয়া গেছে। এখনই দেখো!','তোমার প্রশ্নের জবাব দেওয়া হয়েছে! সমাধান দেখতে ক্লিক করো','সমাধান এসে গেছে! "{{doubtTitle}}" — এখনই পড়ো 📖'],
+    cta:'সমাধান দেখো', dl:'brritto://doubt/{{doubtId}}', phase:'Active', vars:['{{doubtTitle}}','{{doubtId}}'],
+    note:'⚡ CHANGED: Daily cap removed. Every solve triggers a push. Previously max 1/day.' },
+
+  { id:7, cat:'Live Exam', name:'Live Exam Reminder', changed:false, deliveryTarget:'individual',
+    trigType:'config', tc:'exam_hours', tv:{dir:'before', hours:'24'},
+    aud:['All'], subAud:['All'], style:'Push + Inbox',
+    appearTime:'set', scheduleVal:'24', scheduleUnit:'hours before exam',
+    titles:['আগামীকাল পরীক্ষা! ⏰'],
+    bodies:['{{examTitle}} আগামীকাল {{examTime}} এ শুরু হবে। প্রস্তুত থেকো!','মাত্র ২৪ ঘণ্টা বাকি! {{examTitle}} — এখনই প্রস্তুতি নাও','কাল পরীক্ষা! সময় মতো অংশ নিতে ভুলো না 📝'],
+    cta:'বিস্তারিত দেখো', dl:'brritto://live-exam/{{examId}}', phase:'Active', vars:['{{examTitle}}','{{examTime}}','{{examId}}'] },
+
+  { id:8, cat:'Live Exam', name:'Result Published', changed:false, deliveryTarget:'individual',
+    trigType:'auto', autoDesc:'Fires when admin publishes exam results. Sends only to students who submitted.',
+    aud:['All'], subAud:['All'], style:'Push + Inbox',
+    appearTime:'event', scheduleVal:'', scheduleUnit:'hours',
+    titles:['ফলাফল প্রকাশিত! 🏆'],
+    bodies:['{{examTitle}} এর ফলাফল দেখো — তুমি কত পেয়েছ?','ফলাফল এসে গেছে! এখনই দেখো 👀','তোমার {{examTitle}} ফলাফল এখন দেখা যাচ্ছে!'],
+    cta:'ফলাফল দেখো', dl:'brritto://live-exam/{{examId}}/results', phase:'Active', vars:['{{examTitle}}','{{examId}}'] },
+
+  { id:9, cat:'Course', name:'Course Enrolled', changed:false, deliveryTarget:'individual',
+    trigType:'auto', autoDesc:'Fires instantly when a student successfully enrolls in any course.',
+    aud:['All'], subAud:['Course'], style:'Push + Inbox',
+    appearTime:'event', scheduleVal:'', scheduleUnit:'hours',
+    titles:['কোর্সে ভর্তি সম্পন্ন! 🎓'],
+    bodies:['তুমি {{courseName}} এ ভর্তি হয়েছ। পড়াশোনা শুরু করো!','{{courseName}} — তোমার নতুন যাত্রা শুরু হোক আজই!','ভর্তি সম্পন্ন! {{courseName}} এখন তোমার জন্য প্রস্তুত 📚'],
+    cta:'কোর্স শুরু করো', dl:'brritto://course/{{courseId}}', phase:'Active', vars:['{{courseName}}','{{courseId}}'] },
+
+  { id:10, cat:'Course', name:'Course Completed', changed:false, deliveryTarget:'individual',
+    trigType:'auto', autoDesc:'Fires when a student completes 100% of all course content.',
+    aud:['All'], subAud:['Course'], style:'Push + Inbox',
+    appearTime:'event', scheduleVal:'', scheduleUnit:'hours',
+    titles:['কোর্স সম্পন্ন! 🎉'],
+    bodies:['অভিনন্দন! তুমি {{courseName}} সফলভাবে শেষ করেছ!','{{courseName}} শেষ! সার্টিফিকেট নেওয়ার সময় এসেছে 🏅','তুমি করে দেখালে! {{courseName}} সম্পন্ন — অসাধারণ! 🎊'],
+    cta:'সার্টিফিকেট নাও', dl:'brritto://course/{{courseId}}/certificate', phase:'Active', vars:['{{courseName}}','{{courseId}}'] },
+
+  { id:11, cat:'Course', name:'Package Recommendation', changed:false, deliveryTarget:'broadcast',
+    trigType:'config', tc:'interval', tv:{days:'7', unit:'Days'},
+    aud:['All'], subAud:['None'], style:'Push + Inbox',
+    appearTime:'set', scheduleVal:'7', scheduleUnit:'days interval',
+    titles:['তোমার জন্য নতুন কোর্স! 📚'],
+    bodies:['তোমার পছন্দ অনুযায়ী এই কোর্সগুলো দেখো!','নতুন কোর্স যোগ হয়েছে — তোমার জন্য বেছে রেখেছি!','পড়াশোনাকে আরও এগিয়ে নিতে এই কোর্সটি দেখো 👇'],
+    cta:'কোর্স দেখো', dl:'brritto://courses', phase:'Active', vars:[],
+    note:'Targets users not enrolled in any package.' },
+
+  { id:12, cat:'Retention', name:'User Inactive', changed:false, deliveryTarget:'broadcast',
+    trigType:'config', tc:'inactive', tv:{days:'3'},
+    aud:['All'], subAud:['None'], style:'Push',
+    appearTime:'set', scheduleVal:'3', scheduleUnit:'days inactive',
+    titles:['তোমাকে মিস করছি! 😔'],
+    bodies:['আজ পড়াশোনা করোনি। একটু পড়লে কেমন হয়?','তোমার পড়াশোনা থমকে আছে। আজই ফিরে এসো!','পরীক্ষার জন্য সময় কম। আজই একটু পড়ো! 📖','তোমার লক্ষ্য পূরণ করতে আজই ফিরে এসো!','প্রতিযোগীরা এগিয়ে যাচ্ছে। তুমি কি পিছিয়ে থাকবে?'],
+    cta:'পড়াশোনায় ফিরি', dl:'brritto://home', phase:'Active', vars:[],
+    note:'Create multiple entries for escalating stages: 1 day, 3 days, 7 days, 14 days. Resets on any app open.' },
+
+  { id:13, cat:'Subscription', name:'Subscription Expiry Warning', changed:false, deliveryTarget:'individual',
+    trigType:'config', tc:'expiry', tv:{days:'7'},
+    aud:['All'], subAud:['Package'], style:'Push + Inbox',
+    appearTime:'set', scheduleVal:'7', scheduleUnit:'days before expiry',
+    titles:['সাবস্ক্রিপশন শেষ হচ্ছে! ⚠️'],
+    bodies:['তোমার {{packageName}} এর মেয়াদ {{daysLeft}} দিনে শেষ হবে।','{{daysLeft}} দিন বাকি! {{packageName}} নবায়ন করো','সময় শেষ হওয়ার আগেই সাবস্ক্রিপশন নবায়ন করে নাও!'],
+    cta:'নবায়ন করো', dl:'brritto://subscription', phase:'Phase 2', vars:['{{packageName}}','{{daysLeft}}'] },
+
+  { id:14, cat:'Subscription', name:'Free Trial Expiry', changed:false, deliveryTarget:'individual',
+    trigType:'config', tc:'trial_exp', tv:{days:'3'},
+    aud:['All'], subAud:['None'], style:'Push + Inbox',
+    appearTime:'set', scheduleVal:'3', scheduleUnit:'days before trial ends',
+    titles:['ফ্রি ট্রায়াল শেষ হচ্ছে!'],
+    bodies:['তোমার ফ্রি ট্রায়াল {{daysLeft}} দিনে শেষ হবে। এখনই আপগ্রেড করো!','আর মাত্র {{daysLeft}} দিন! প্রিমিয়াম চালিয়ে যেতে সাবস্ক্রাইব করো।'],
+    cta:'প্ল্যান দেখো', dl:'brritto://subscription', phase:'Phase 2', vars:['{{daysLeft}}'] },
+
+  { id:15, cat:'Subscription', name:'Free Trial Offer', changed:false, deliveryTarget:'broadcast',
+    trigType:'config', tc:'trial_offer', tv:{days:'7'},
+    aud:['All'], subAud:['None'], style:'Push + Inbox + Splash',
+    appearTime:'set', scheduleVal:'', scheduleUnit:'admin sets send date',
+    titles:['ফ্রি ট্রায়াল শুরু করো! 🆓'],
+    bodies:['{{trialDays}} দিনের ফ্রি ট্রায়ালে সব কিছু ব্যবহার করো!','বিনামূল্যে {{trialDays}} দিন Brritto Premium ব্যবহার করো!','ফ্রি ট্রায়াল সুযোগ মিস করো না — {{trialDays}} দিন বিনামূল্যে!'],
+    cta:'ফ্রি শুরু করো', dl:'brritto://subscription', phase:'Phase 2', vars:['{{trialDays}}'],
+    note:'Manual broadcast — admin sends from Broadcasts panel with a target date.' },
+];
+
+// ═══════════════════════ LIST ═══════════════════════
+function renderList() {
+  const cats = [...new Set(EVENTS.map(e=>e.cat))];
+  let h='';
+  cats.forEach(cat=>{
+    const c = CATS[cat]||{icon:'📌',color:'var(--accent)'};
+    const evs = EVENTS.filter(e=>e.cat===cat);
+    h+=`<div class="cat-block">
+      <div class="cat-row">
+        <span class="cat-ico">${c.icon}</span>
+        <span class="cat-lbl">${cat}</span>
+        <span class="cat-n">${evs.length}</span>
+        <div class="cat-line"></div>
+      </div>
+      <div class="ev-list">`;
+    evs.forEach(ev=>{
+      const pt=ev.phase==='Active'?'tag-active':ev.phase==='Phase 2'?'tag-p2':'tag-paused';
+      const pe=ev.phase==='Active'?'● Active':ev.phase==='Phase 2'?'◆ Phase 2':'⏸ Paused';
+      const trigSum = ev.trigType==='auto'
+        ? `<span class="hig">⚡ Auto</span> — fires when event occurs`
+        : `<span class="hi">⚙ Configurable</span> — ${trigSummary(ev)}`;
+      const ch = ev.changed?`<span class="tag tag-changed" style="font-size:10px">⚡ Changed</span>`:'';
+      const dtTag = ev.deliveryTarget==='broadcast'
+        ? `<span class="tag" style="background:rgba(251,191,36,.08);color:var(--orange);border:1px solid rgba(251,191,36,.2);font-size:10px">📢 Broadcast</span>`
+        : `<span class="tag" style="background:var(--blue-dim);color:var(--accent);border:1px solid var(--blue-border);font-size:10px">👤 Individual</span>`;
+      h+=`<div class="ev-row${ev.changed?' changed':''}" onclick="openEvent(${ev.id})">
+        <div class="ev-main">
+          <div class="ev-name">${ev.name} ${ch}</div>
+          <div class="ev-meta">
+            <div class="ev-trig">${trigSum}</div>
+          </div>
+        </div>
+        ${dtTag}
+        <span class="tag tag-style">${ev.style}</span>
+        <span class="tag ${pt}">${pe}</span>
+        <span class="ev-arrow">›</span>
+      </div>`;
+    });
+    h+=`</div></div>`;
+  });
+  document.getElementById('listBody').innerHTML=h;
+  document.getElementById('stT').textContent=EVENTS.length;
+  document.getElementById('stA').textContent=EVENTS.filter(e=>e.phase==='Active').length;
+  document.getElementById('stP').textContent=EVENTS.filter(e=>e.phase==='Phase 2').length;
+  document.getElementById('stPa').textContent=EVENTS.filter(e=>e.phase==='Paused').length;
+}
+
+function trigSummary(ev) {
+  const v=ev.tv||{};
+  if(ev.tc==='days_signup') return `${v.days||'?'} day(s) after signup`;
+  if(ev.tc==='learn') { const rs=v.rules||[]; return rs.map(r=>`at <b>${r.count||'?'}</b>`).join(', ')+' — each with own messages'; }
+  if(ev.tc==='test_score') { const rs=v.rules||[]; return rs.map(r=>`${r.op||'>='}${r.score||'?'}%`).join(', ')+' — each with own messages'; }
+  if(ev.tc==='exam_hours') return `${v.hours||'?'} hours ${v.dir||'before'} exam`;
+  if(ev.tc==='interval') return `every ${v.days||'?'} ${v.unit||'Days'}`;
+  if(ev.tc==='inactive') return `${v.days||'?'} days inactive`;
+  if(ev.tc==='expiry') return `${v.days||'?'} days before expiry`;
+  if(ev.tc==='trial_exp') return `${v.days||'?'} days before trial ends`;
+  if(ev.tc==='trial_offer') return `admin-triggered, ${v.days||'?'} day trial`;
+  return '';
+}
+
+function goList() {
+  document.getElementById('viewList').style.display='';
+  document.getElementById('viewCfg').classList.remove('on');
+  document.getElementById('tbTitle').textContent='Event Trigger Notifications';
+  document.getElementById('tbBc').textContent='Announcement & Feed  ›  Event Trigger Notifications';
+  document.getElementById('tbExtra').innerHTML='';
+}
+
+// ═══════════════════════ CONFIG ═══════════════════════
+let curId=null;
+
+function openEvent(id) {
+  curId=id;
+  const ev=EVENTS.find(e=>e.id===id);
+  document.getElementById('viewList').style.display='none';
+  document.getElementById('viewCfg').classList.add('on');
+  document.getElementById('tbTitle').textContent=ev.name;
+  document.getElementById('tbBc').textContent=`Events  ›  ${ev.cat}  ›  ${ev.name}`;
+  document.getElementById('tbExtra').innerHTML=`<button class="btn btn-outline btn-sm" onclick="goList()">← Back</button>
+    <button class="btn btn-save btn-sm" onclick="saveEvt()">Save Configuration</button>`;
+  const cat=CATS[ev.cat]||{icon:'📌'};
+  document.getElementById('cfgCat').textContent=`${cat.icon}  ${ev.cat}`;
+  document.getElementById('cfgName').innerHTML=ev.name+(ev.changed?` <span class="tag tag-changed" style="font-size:12px">⚡ Changed</span>`:'');
+  document.getElementById('cfgDesc').textContent=ev.note||'Event name and category are fixed. Configure all notification settings below.';
+  buildForm(ev);
+  setTimeout(updatePreview,30);
+}
+
+function buildForm(ev) {
+  const dlOpts=DL_OPTIONS.map(g=>`<optgroup label="${g.g}">${g.o.map(([v,l])=>`<option value="${v}"${ev.dl===v?' selected':''}>${l}</option>`).join('')}</optgroup>`).join('');
+  const styleOpts=['Push Notification','In-App Toast','Splash Screen','Inbox','Push + Inbox','Splash Screen + Push','Push + Inbox + Splash'].map(s=>`<option${ev.style===s?' selected':''}>${s}</option>`).join('');
+  const audP=['All','SSC','HSC','Admission','Job','Others'].map(a=>`<div class="pill${ev.aud.includes(a)?' on':''}" data-g="aud" data-v="${a}" onclick="tPill(this)">${a}</div>`).join('');
+  const subP=[['None','None (All Users)'],['Course','Course Subscribers'],['Package','Package Subscribers']].map(([v,l])=>`<div class="pill${ev.subAud.includes(v)?' on':''}" data-g="sub" data-v="${v}" onclick="tPill(this)">${l}</div>`).join('');
+  const varChips=(ev.vars||[]).map(v=>`<span class="chip" onclick="insVar('${v}')" title="Insert">${v}</span>`).join('');
+  const isLearn = ev.tc==='learn';
+  const isTest  = ev.tc==='test_score';
+
+  // Trigger section
+  let trigHtml='';
+  if(ev.trigType==='auto') {
+    trigHtml=`${ev.changed?`<div class="trig-changed"><span class="trig-changed-ico">⚡</span><div class="trig-changed-text"><strong>Logic Changed from PRD-02:</strong> ${ev.note||''}</div></div>`:''}<div class="trig-auto"><span class="trig-auto-ico">🔄</span><div class="trig-auto-text"><strong>Auto Trigger</strong> &nbsp;—&nbsp; ${ev.autoDesc}</div></div>`;
+  } else {
+    trigHtml=`<div class="trig-config"><div class="trig-config-lbl">Configure Condition</div>${buildTrigFields(ev)}</div>`;
+  }
+
+  // Appearance Time section
+  const isSet=ev.appearTime==='set';
+  const schedShow=isSet?'show':'';
+  const schedOpts=['hours before','hours after','days after','days before','minutes before'].map(u=>`<option${ev.scheduleUnit===u?' selected':''}>${u}</option>`).join('');
+
+  // Variants
+  const titV=(ev.titles||['']).map((t,i)=>vRow('ttl',i,t)).join('');
+  const bodV=(ev.bodies||['']).map((b,i)=>vRow('bdy',i,b)).join('');
+
+  document.getElementById('cfgForm').innerHTML=`
+
+    <!-- TRIGGER -->
+    <div class="f-card">
+      <div class="f-sect">Trigger Condition</div>
+      ${trigHtml}
+    </div>
+
+    <!-- AUDIENCE -->
+    <div class="f-card">
+      <div class="f-sect">Audience</div>
+      ${buildDeliveryUI(ev)}
+      <div class="f-group">
+        <label class="f-label" id="audLabel">${ev.deliveryTarget==='broadcast' ? 'Target Class' : 'Eligible Classes <span class="opt">— scope filter</span>'}</label>
+        <div class="pill-row" id="audPills">${audP}</div>
+      </div>
+      <div class="f-group">
+        <label class="f-label">${ev.deliveryTarget==='broadcast' ? 'Sub-Audience <span class="opt">(optional)</span>' : 'Eligible Sub-Audience <span class="opt">(optional)</span>'}</label>
+        <div class="pill-row" id="subPills">${subP}</div>
+        <div class="f-hint">${ev.deliveryTarget==='broadcast' ? 'Narrow to course or package subscribers.' : 'Restrict to students in a specific subscription tier.'}</div>
+      </div>
+    </div>
+
+    <!-- APPEARANCE -->
+    <div class="f-card">
+      <div class="f-sect">Appearance</div>
+      <div class="f-row c2">
+        <div class="f-group">
+          <label class="f-label">Appearance Style</label>
+          <select id="fStyle" onchange="updatePreview()">${styleOpts}</select>
+          <div class="f-hint">Push = system notif · Toast = in-app overlay · Splash = full-screen · Inbox = saved</div>
+        </div>
+        <div class="f-group">
+          <label class="f-label">Appearance Time</label>
+          <div class="toggle">
+            <button class="tgl${!isSet?' on':''}" id="tEvt" onclick="setTime('event')">⚡ Event Time</button>
+            <button class="tgl${isSet?' on-set':''}" id="tSet" onclick="setTime('set')">⏰ Set Time</button>
+          </div>
+          <div class="f-hint" id="timeHint">${isSet?'Fires at a scheduled delay — configure timing in the trigger section above.':'Fires instantly the moment the trigger condition is met.'}</div>
+        </div>
+      </div>
+      <div class="appear-row ${schedShow}" id="schedRow">
+        <div class="f-group">
+          <label class="f-label">Delay / Schedule Value</label>
+          <input type="number" id="fSchedVal" value="${ev.scheduleVal||''}" min="0" placeholder="e.g. 24" oninput="updatePreview()">
+        </div>
+        <div class="f-group">
+          <label class="f-label">Unit</label>
+          <select id="fSchedUnit" onchange="updatePreview()">${schedOpts}</select>
+        </div>
+      </div>
+    </div>
+
+    ${(isLearn||isTest) ? '' : `
+    <!-- NOTIFICATION TITLE (non-rule events) -->
+    <div class="f-card">
+      <div class="f-sect">Notification Title</div>
+      <div class="f-group">
+        <label class="f-label">Title Variants <span class="opt">— system picks one randomly per send</span></label>
+        <div class="variants" id="ttlVars">${titV}</div>
+        <div class="add-var" onclick="addVar('ttl')">＋ Add variant</div>
+      </div>
+    </div>
+
+    <div class="f-card">
+      <div class="f-sect">Message Body</div>
+      <div class="f-group">
+        <label class="f-label">Body Variants <span class="opt">— system picks one randomly per send</span></label>
+        <div class="variants" id="bdyVars">${bodV}</div>
+        <div class="add-var" onclick="addVar('bdy')">＋ Add variant</div>
+        ${varChips?`<div class="chip-row" id="varChips">${varChips}</div>`:''}
+        <div class="f-hint" style="margin-top:${varChips?'4':'8'}px">Use <code>{{variable}}</code> for dynamic values. ${varChips?'Click chips to insert at cursor.':''}</div>
+      </div>
+    </div>`}
+
+    <!-- CTA + DEEP LINK -->
+    <div class="f-card">
+      <div class="f-sect">CTA & Deep Link</div>
+      <div class="f-row c2">
+        <div class="f-group">
+          <label class="f-label">CTA Button Label <span class="opt">(optional)</span></label>
+          <input type="text" id="fCTA" value="${ev.cta||''}" placeholder="Leave blank to hide button" oninput="updatePreview()">
+        </div>
+        <div class="f-group">
+          <label class="f-label">Deep Link Destination</label>
+          <select id="fDL" onchange="updatePreview()">${dlOpts}</select>
+          <div class="f-hint">Screen the student lands on after tapping.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SAVE BAR -->
+    <div class="save-bar">
+      <div class="phase-row">
+        <span class="phase-label">Status</span>
+        <div class="phase-tgl">
+          <button class="ph-btn${ev.phase==='Active'?' on-a':''}" onclick="setPhase('Active')">Active</button>
+          <button class="ph-btn${ev.phase==='Phase 2'?' on-p2':''}" onclick="setPhase('Phase 2')">Phase 2</button>
+          <button class="ph-btn${ev.phase==='Paused'?' on-pause':''}" onclick="setPhase('Paused')">Paused</button>
+        </div>
+      </div>
+      <button class="btn btn-save" onclick="saveEvt()">Save Configuration</button>
+    </div>
+  `;
+
+  setTimeout(()=>{
+    if(isLearn) {
+      updLearnPreview();
+    } else if(isTest) {
+      updTestPreview();
+    } else {
+      document.querySelectorAll('#ttlVars textarea,#bdyVars textarea').forEach(t=>t.addEventListener('input',updatePreview));
+      document.querySelectorAll('#varChips .chip').forEach(c=>c.addEventListener('click',()=>{
+        const last=[...document.querySelectorAll('#bdyVars textarea')].pop();
+        if(last){const s=last.selectionStart,e=last.selectionEnd,v=c.textContent;last.value=last.value.slice(0,s)+v+last.value.slice(e);last.selectionStart=last.selectionEnd=s+v.length;last.focus();updatePreview();}
+      }));
+      updatePreview();
+    }
+  },20);
+}
+
+function buildDeliveryUI(ev) {
+  const isInd = ev.deliveryTarget !== 'broadcast';
+  const infoHtml = isInd
+    ? `<div class="dt-info ind" id="dtInfo">
+        <span class="dt-ico">👤</span>
+        <div class="dt-text"><strong>Individual Delivery</strong> — Sends only to the student who triggered this event. Other students are never notified. The class filter below restricts which students are eligible to receive it.</div>
+       </div>`
+    : `<div class="dt-info bcast" id="dtInfo">
+        <span class="dt-ico">📢</span>
+        <div class="dt-text"><strong>Broadcast Delivery</strong> — Sends to all students who match the audience filter below. No specific user action is required to trigger it.</div>
+       </div>`;
+  return `
+    <div class="f-group" style="margin-bottom:10px">
+      <label class="f-label">Delivery Target</label>
+      <div class="toggle">
+        <button class="tgl${isInd?' on':''}" id="dtInd" onclick="setDelivery('individual')">👤 Individual</button>
+        <button class="tgl${!isInd?' on-set':''}" id="dtBcast" onclick="setDelivery('broadcast')">📢 Broadcast</button>
+      </div>
+    </div>
+    ${infoHtml}`;
+}
+
+function setDelivery(mode) {
+  const ev = EVENTS.find(e=>e.id===curId); if(!ev) return;
+  ev.deliveryTarget = mode;
+  const isInd = mode === 'individual';
+  document.getElementById('dtInd').className  = 'tgl' + (isInd ? ' on' : '');
+  document.getElementById('dtBcast').className = 'tgl' + (!isInd ? ' on-set' : '');
+  const info = document.getElementById('dtInfo');
+  if(info) {
+    info.className = 'dt-info ' + (isInd ? 'ind' : 'bcast');
+    info.innerHTML = isInd
+      ? `<span class="dt-ico">👤</span><div class="dt-text"><strong>Individual Delivery</strong> — Sends only to the student who triggered this event. Other students are never notified. The class filter below restricts which students are eligible to receive it.</div>`
+      : `<span class="dt-ico">📢</span><div class="dt-text"><strong>Broadcast Delivery</strong> — Sends to all students who match the audience filter below. No specific user action is required to trigger it.</div>`;
+  }
+  const audLabel = document.getElementById('audLabel');
+  if(audLabel) audLabel.innerHTML = isInd
+    ? 'Eligible Classes <span class="opt">— scope filter</span>'
+    : 'Target Class';
+}
+
+function buildTrigFields(ev) {
+  const v=ev.tv||{};
+  if(ev.tc==='days_signup') return `
+    <div class="f-row c2"><div class="f-group">
+      <label class="f-label">Days after signup</label>
+      <input type="number" id="tf1" value="${v.days||'1'}" min="1" oninput="updTP()">
+      <div class="f-hint">e.g. create entries for day 1, day 3, day 7</div>
+    </div></div>
+    ${tp('Fires <b class="b" id="tp1">'+(v.days||'1')+'</b> day(s) after signup if profile is still incomplete')}`;
+
+  if(ev.tc==='learn') {
+    const rules = (v.rules && v.rules.length) ? v.rules : [{count:'5',type:'Correct / Wrong / Attempts',titles:[''],bodies:['']}];
+    const ruleCards = rules.map((r,i)=>buildLearnRuleCard(i,r)).join('');
+    return `
+    <div style="font-size:11.5px;color:var(--t2);margin-bottom:12px;line-height:1.6">
+      Each milestone rule fires when the student reaches that count. Every rule has its own <strong>Title Variants</strong> and <strong>Body Variants</strong> — the system picks one randomly per fire.
+    </div>
+    <div id="learnRules">${ruleCards}</div>
+    <div class="add-var" style="margin-top:4px" onclick="addLearnRule()">＋ Add milestone rule</div>`;
+  }
+
+  if(ev.tc==='test_score') {
+    const rules = (v.rules && v.rules.length) ? v.rules : [{op:'>=',score:'80',titles:[''],bodies:['']}];
+    const ruleCards = rules.map((r,i)=>buildTestRuleCard(i,r)).join('');
+    return `
+    <div style="font-size:11.5px;color:var(--t2);margin-bottom:12px;line-height:1.6">
+      Each score rule fires when the test result matches. Rules are checked from highest score downward. Every rule has its own <strong>Title Variants</strong> and <strong>Body Variants</strong> — the system picks one randomly per fire.
+    </div>
+    <div id="testRules">${ruleCards}</div>
+    <div class="add-var" style="margin-top:4px" onclick="addTestRule()">＋ Add score rule</div>`;
+  }
+
+  if(ev.tc==='exam_hours') return `
+    <div class="f-row c2">
+      <div class="f-group"><label class="f-label">Hours</label>
+        <input type="number" id="tf1" value="${v.hours||'24'}" min="0" max="120" oninput="updTP()">
+      </div>
+      <div class="f-group"><label class="f-label">Direction</label>
+        <select id="tf2" onchange="updTP()">
+          <option${v.dir==='before'?' selected':''}>before</option>
+          <option${v.dir==='after'?' selected':''}>after</option>
+        </select>
+        <div class="f-hint">Relative to exam start time</div>
+      </div>
+    </div>
+    ${tp('Fires <b class="b" id="tp1">'+(v.hours||'24')+'</b> hours <b class="b" id="tp2">'+(v.dir||'before')+'</b> exam start time')}`;
+
+  if(ev.tc==='interval') return `
+    <div class="f-row c2">
+      <div class="f-group"><label class="f-label">Send every</label>
+        <input type="number" id="tf1" value="${v.days||'7'}" min="1" oninput="updTP()">
+      </div>
+      <div class="f-group"><label class="f-label">Unit</label>
+        <select id="tf2" onchange="updTP()">
+          <option${(v.unit||'Days')==='Days'?' selected':''}>Days</option>
+          <option${v.unit==='Weeks'?' selected':''}>Weeks</option>
+        </select>
+      </div>
+    </div>
+    ${tp('Sends every <b class="b" id="tp1">'+(v.days||'7')+'</b> <b class="b" id="tp2">'+(v.unit||'Days')+'</b> — targets users not in any package')}`;
+
+  if(ev.tc==='inactive') return `
+    <div class="f-row c2"><div class="f-group">
+      <label class="f-label">Days inactive</label>
+      <input type="number" id="tf1" value="${v.days||'3'}" min="1" oninput="updTP()">
+      <div class="f-hint">Create escalating stages: 1, 3, 7, 14, 30 days</div>
+    </div></div>
+    ${tp('Fires after <b class="b" id="tp1">'+(v.days||'3')+'</b> days with no app open')}`;
+
+  if(ev.tc==='expiry') return `
+    <div class="f-row c2"><div class="f-group">
+      <label class="f-label">Days before expiry</label>
+      <input type="number" id="tf1" value="${v.days||'7'}" min="1" oninput="updTP()">
+      <div class="f-hint">e.g. create entries for 7 days, 3 days, 1 day</div>
+    </div></div>
+    ${tp('Fires <b class="b" id="tp1">'+(v.days||'7')+'</b> days before subscription expires')}`;
+
+  if(ev.tc==='trial_exp') return `
+    <div class="f-row c2"><div class="f-group">
+      <label class="f-label">Days before trial ends</label>
+      <input type="number" id="tf1" value="${v.days||'3'}" min="1" max="14" oninput="updTP()">
+    </div></div>
+    ${tp('Fires <b class="b" id="tp1">'+(v.days||'3')+'</b> days before free trial expires')}`;
+
+  if(ev.tc==='trial_offer') return `
+    <div class="f-row c2"><div class="f-group">
+      <label class="f-label">Trial duration (days)</label>
+      <input type="number" id="tf1" value="${v.days||'7'}" min="1" oninput="updTP()">
+      <div class="f-hint good">Manual broadcast — admin sets send date from Broadcasts section</div>
+    </div></div>
+    ${tp('Admin-triggered broadcast offering <b class="b" id="tp1">'+(v.days||'7')+'</b> days free trial')}`;
+
+  return '';
+}
+
+function tp(html) {
+  return `<div class="trig-preview">→ ${html}</div>`;
+}
+
+function buildLearnRuleCard(idx, rule) {
+  const titRows = (rule.titles||['']).map((t,i)=>lrVarRow(i,t,'title')).join('');
+  const bodRows = (rule.bodies||['']).map((b,i)=>lrVarRow(i,b,'body')).join('');
+  const del = idx > 0
+    ? `<div class="lr-del-btn" onclick="delLearnRule(this)" title="Remove rule">✕</div>`
+    : `<div style="width:22px"></div>`;
+  return `<div class="lr-card">
+    <div class="lr-head">
+      <span class="lr-badge">Rule ${idx+1}</span>
+      <span class="lr-summary">When count reaches <b>${rule.count||'?'}</b> &nbsp;·&nbsp; ${rule.type||'All types'}</span>
+      ${del}
+    </div>
+    <div class="lr-body">
+      <div class="lr-trigger-row">
+        <div class="f-group" style="margin:0">
+          <label class="f-label">Count</label>
+          <input type="number" class="lr-count" value="${rule.count||'5'}" min="1" oninput="updLRSummary(this)">
+        </div>
+        <div class="f-group" style="margin:0">
+          <label class="f-label">Applies to</label>
+          <select class="lr-type" onchange="updLRSummary(this)">
+            ${['Correct / Wrong / Attempts','Correct only','Wrong only','Attempts only'].map(t=>`<option${(rule.type||'Correct / Wrong / Attempts')===t?' selected':''}>${t}</option>`).join('')}
+          </select>
+        </div>
+      </div>
+      <div class="f-row c2" style="gap:14px">
+        <div>
+          <div class="lr-sect">Title Variants <span style="font-weight:400;text-transform:none;letter-spacing:0;color:var(--t3)">(random pick)</span></div>
+          <div class="lr-var-list">${titRows}</div>
+          <div class="add-var" onclick="addLRVar(this,'title')">＋ Add title variant</div>
+        </div>
+        <div>
+          <div class="lr-sect">Body Variants <span style="font-weight:400;text-transform:none;letter-spacing:0;color:var(--t3)">(random pick)</span></div>
+          <div class="lr-var-list">${bodRows}</div>
+          <div class="add-var" onclick="addLRVar(this,'body')">＋ Add body variant</div>
+          <div class="chip-row" style="margin-top:7px">
+            <span class="chip" onclick="insLRVar(this,'{{count}}')" title="Insert variable">{{count}}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>`;
+}
+
+function lrVarRow(idx, val, type) {
+  const del = idx > 0
+    ? `<div class="lr-var-del" onclick="delLRVar(this,'${type}')">✕</div>`
+    : `<div style="width:24px;flex-shrink:0"></div>`;
+  return `<div class="lr-var-row">
+    <div class="lr-var-n">${idx+1}</div>
+    <textarea placeholder="${type==='title'?'Toast title (optional)...':'Toast message body...'}" oninput="updLearnPreview()">${val||''}</textarea>
+    ${del}
+  </div>`;
+}
+
+function addLearnRule() {
+  const container = document.getElementById('learnRules');
+  const idx = container.children.length;
+  const newRule = { count: String((idx+1)*5), type:'Correct / Wrong / Attempts', titles:[''], bodies:[''] };
+  const div = document.createElement('div');
+  div.innerHTML = buildLearnRuleCard(idx, newRule);
+  container.appendChild(div.firstElementChild);
+  renumberLearnRules();
+  updLearnPreview();
+}
+
+function delLearnRule(btn) {
+  if(document.querySelectorAll('#learnRules .lr-card').length <= 1) return;
+  btn.closest('.lr-card').remove();
+  renumberLearnRules();
+  updLearnPreview();
+}
+
+function renumberLearnRules() {
+  document.querySelectorAll('#learnRules .lr-card').forEach((c,i)=>{
+    c.querySelector('.lr-badge').textContent = `Rule ${i+1}`;
+  });
+}
+
+function addLRVar(btn, type) {
+  const card = btn.closest('.lr-card');
+  const list = type==='title' ? card.querySelectorAll('.lr-var-list')[0] : card.querySelectorAll('.lr-var-list')[1];
+  const idx = list.children.length;
+  const d = document.createElement('div');
+  d.innerHTML = lrVarRow(idx, '', type);
+  const row = d.firstElementChild;
+  list.appendChild(row);
+  row.querySelector('textarea').focus();
+  updLearnPreview();
+}
+
+function delLRVar(btn, type) {
+  const card = btn.closest('.lr-card');
+  btn.closest('.lr-var-row').remove();
+  const list = type==='title' ? card.querySelectorAll('.lr-var-list')[0] : card.querySelectorAll('.lr-var-list')[1];
+  list.querySelectorAll('.lr-var-n').forEach((n,i)=>n.textContent=i+1);
+  updLearnPreview();
+}
+
+function insLRVar(chip, v) {
+  const card = chip.closest('.lr-card');
+  const last = [...card.querySelectorAll('.lr-var-list')[1].querySelectorAll('textarea')].pop();
+  if(!last) return;
+  const s=last.selectionStart, e=last.selectionEnd;
+  last.value=last.value.slice(0,s)+v+last.value.slice(e);
+  last.selectionStart=last.selectionEnd=s+v.length;
+  last.focus(); updLearnPreview();
+}
+
+function updLRSummary(input) {
+  const card = input.closest('.lr-card');
+  const count = card.querySelector('.lr-count').value || '?';
+  const type = card.querySelector('.lr-type').value || 'All types';
+  card.querySelector('.lr-summary').innerHTML = `When count reaches <b>${count}</b> &nbsp;·&nbsp; ${type}`;
+}
+
+function updLearnPreview() {
+  const cards = document.querySelectorAll('#learnRules .lr-card');
+  if(!cards.length) return;
+  // Show first rule's first body in the preview panel
+  const firstBody = cards[0].querySelectorAll('.lr-var-list')[1]?.querySelector('textarea')?.value || 'Toast message...';
+  const firstTitle = cards[0].querySelectorAll('.lr-var-list')[0]?.querySelector('textarea')?.value || '';
+  const style = document.getElementById('fStyle')?.value || '';
+  const box = document.getElementById('pvBox');
+  if(box) {
+    box.innerHTML = `<div class="pv-toast">
+      <div style="font-size:22px">🔔</div>
+      <div>
+        ${firstTitle?`<div style="font-size:12px;font-weight:700;color:#d0d8f0;margin-bottom:2px">${firstTitle}</div>`:''}
+        <div class="pv-toast-txt">${firstBody}</div>
+        <div class="pv-toast-sub">brritto · Rule 1 of ${cards.length} · now</div>
+      </div>
+    </div>`;
+  }
+  // Update meta
+  const ruleCount = cards.length;
+  const allBodyCount = [...document.querySelectorAll('#learnRules .lr-var-list')].filter((_,i)=>i%2===1).reduce((a,l)=>a+l.querySelectorAll('textarea').length,0);
+  const vc = document.getElementById('pvVC');
+  if(vc) vc.textContent = `${ruleCount} rules · ${allBodyCount} variants`;
+  const pt = document.getElementById('pvTime');
+  if(pt) pt.textContent = '⚡ Event Time';
+  const ps = document.getElementById('pvStyle');
+  if(ps) ps.textContent = document.getElementById('fStyle')?.value||'In-App Toast';
+  const pa = document.getElementById('pvAud');
+  if(pa) pa.textContent = [...document.querySelectorAll('#audPills .pill.on')].map(p=>p.dataset.v).join(', ')||'All';
+}
+
+// ── TEST SCORE RULE HELPERS ──────────────────────────────────
+function buildTestRuleCard(idx, rule) {
+  const titRows = (rule.titles||['']).map((t,i)=>lrVarRow(i,t,'title')).join('');
+  const bodRows = (rule.bodies||['']).map((b,i)=>lrVarRow(i,b,'body')).join('');
+  const ops = ['>=','<=','='];
+  const opOpts = ops.map(o=>`<option${(rule.op||'>=')===o?' selected':''}>${o}</option>`).join('');
+  const del = idx > 0
+    ? `<div class="lr-del-btn" onclick="delTestRule(this)" title="Remove rule">✕</div>`
+    : `<div style="width:22px"></div>`;
+  return `<div class="lr-card">
+    <div class="lr-head">
+      <span class="lr-badge">Rule ${idx+1}</span>
+      <span class="lr-summary">Score <b>${rule.op||'>='} ${rule.score||'?'}%</b></span>
+      ${del}
+    </div>
+    <div class="lr-body">
+      <div class="lr-trigger-row">
+        <div class="f-group" style="margin:0">
+          <label class="f-label">Operator</label>
+          <select class="tr-op" onchange="updTRSummary(this)">${opOpts}</select>
+        </div>
+        <div class="f-group" style="margin:0">
+          <label class="f-label">Score % (0–100)</label>
+          <input type="number" class="tr-score" value="${rule.score||'80'}" min="0" max="100" oninput="updTRSummary(this)">
+        </div>
+      </div>
+      <div class="f-row c2" style="gap:14px">
+        <div>
+          <div class="lr-sect">Title Variants <span style="font-weight:400;text-transform:none;letter-spacing:0;color:var(--t3)">(random pick)</span></div>
+          <div class="lr-var-list">${titRows}</div>
+          <div class="add-var" onclick="addTRVar(this,'title')">＋ Add title variant</div>
+        </div>
+        <div>
+          <div class="lr-sect">Body Variants <span style="font-weight:400;text-transform:none;letter-spacing:0;color:var(--t3)">(random pick)</span></div>
+          <div class="lr-var-list">${bodRows}</div>
+          <div class="add-var" onclick="addTRVar(this,'body')">＋ Add body variant</div>
+          <div class="chip-row" style="margin-top:7px">
+            <span class="chip" onclick="insTRVar(this,'{{score}}')" title="Insert">{{score}}</span>
+            <span class="chip" onclick="insTRVar(this,'{{testTitle}}')" title="Insert">{{testTitle}}</span>
+            <span class="chip" onclick="insTRVar(this,'{{testId}}')" title="Insert">{{testId}}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>`;
+}
+
+function addTestRule() {
+  const container = document.getElementById('testRules');
+  const idx = container.children.length;
+  const newRule = { op:'>=', score:'30', titles:[''], bodies:[''] };
+  const div = document.createElement('div');
+  div.innerHTML = buildTestRuleCard(idx, newRule);
+  container.appendChild(div.firstElementChild);
+  renumberTestRules();
+  updTestPreview();
+}
+
+function delTestRule(btn) {
+  if(document.querySelectorAll('#testRules .lr-card').length <= 1) return;
+  btn.closest('.lr-card').remove();
+  renumberTestRules();
+  updTestPreview();
+}
+
+function renumberTestRules() {
+  document.querySelectorAll('#testRules .lr-card').forEach((c,i)=>{
+    c.querySelector('.lr-badge').textContent = `Rule ${i+1}`;
+  });
+}
+
+function addTRVar(btn, type) {
+  const card = btn.closest('.lr-card');
+  const list = type==='title' ? card.querySelectorAll('.lr-var-list')[0] : card.querySelectorAll('.lr-var-list')[1];
+  const idx = list.children.length;
+  const div = document.createElement('div');
+  div.innerHTML = lrVarRow(idx, '', type);
+  list.appendChild(div.firstElementChild);
+  list.lastElementChild.querySelector('textarea').focus();
+  updTestPreview();
+}
+
+function delTRVar(btn, type) {
+  const card = btn.closest('.lr-card');
+  btn.closest('.lr-var-row').remove();
+  const list = type==='title' ? card.querySelectorAll('.lr-var-list')[0] : card.querySelectorAll('.lr-var-list')[1];
+  list.querySelectorAll('.lr-var-n').forEach((n,i)=>n.textContent=i+1);
+  updTestPreview();
+}
+
+function insTRVar(chip, v) {
+  const card = chip.closest('.lr-card');
+  const last = [...card.querySelectorAll('.lr-var-list')[1].querySelectorAll('textarea')].pop();
+  if(!last) return;
+  const s=last.selectionStart, e=last.selectionEnd;
+  last.value=last.value.slice(0,s)+v+last.value.slice(e);
+  last.selectionStart=last.selectionEnd=s+v.length;
+  last.focus(); updTestPreview();
+}
+
+function updTRSummary(input) {
+  const card = input.closest('.lr-card');
+  const op = card.querySelector('.tr-op').value;
+  const score = card.querySelector('.tr-score').value || '?';
+  card.querySelector('.lr-summary').innerHTML = `Score <b>${op} ${score}%</b>`;
+}
+
+function updTestPreview() {
+  const cards = document.querySelectorAll('#testRules .lr-card');
+  if(!cards.length) return;
+  const firstBody = cards[0].querySelectorAll('.lr-var-list')[1]?.querySelector('textarea')?.value || 'Result message...';
+  const firstTitle = cards[0].querySelectorAll('.lr-var-list')[0]?.querySelector('textarea')?.value || '';
+  const cta = document.getElementById('fCTA')?.value || 'ফলাফল দেখো';
+  const box = document.getElementById('pvBox');
+  if(box) {
+    box.innerHTML = `<div class="pv-splash">
+      <div class="pv-splash-e">📝</div>
+      <div class="pv-splash-t">${firstTitle||'Test Result'}</div>
+      <div class="pv-splash-b">${firstBody}</div>
+      ${cta?`<div class="pv-splash-cta">${cta}</div>`:''}
+    </div>`;
+  }
+  const allBodyCount = [...document.querySelectorAll('#testRules .lr-var-list')].filter((_,i)=>i%2===1).reduce((a,l)=>a+l.querySelectorAll('textarea').length,0);
+  const vc = document.getElementById('pvVC');
+  if(vc) vc.textContent = `${cards.length} rules · ${allBodyCount} variants`;
+  const pt = document.getElementById('pvTime'); if(pt) pt.textContent='⚡ Event Time';
+  const ps = document.getElementById('pvStyle'); if(ps) ps.textContent=document.getElementById('fStyle')?.value||'Splash Screen';
+  const pa = document.getElementById('pvAud'); if(pa) pa.textContent=[...document.querySelectorAll('#audPills .pill.on')].map(p=>p.dataset.v).join(', ')||'All';
+}
+
+function updTP() {
+  const ev=EVENTS.find(e=>e.id===curId); if(!ev||ev.trigType==='auto') return;
+  const g=id=>{const el=document.getElementById(id);return el?el.value:'?';};
+  const up=(id,val)=>{const el=document.getElementById(id);if(el)el.textContent=val;};
+  if(ev.tc==='days_signup') up('tp1',g('tf1'));
+  if(ev.tc==='learn'){updLearnPreview();return;}
+  if(ev.tc==='test_score'){updTestPreview();return;}
+  if(ev.tc==='exam_hours'){up('tp1',g('tf1'));up('tp2',g('tf2'));}
+  if(ev.tc==='interval'){up('tp1',g('tf1'));up('tp2',g('tf2'));}
+  if(ev.tc==='inactive') up('tp1',g('tf1'));
+  if(ev.tc==='expiry') up('tp1',g('tf1'));
+  if(ev.tc==='trial_exp') up('tp1',g('tf1'));
+  if(ev.tc==='trial_offer') up('tp1',g('tf1'));
+}
+
+function vRow(type,idx,val) {
+  const del=idx>0?`<div class="var-del" onclick="delVar(this,'${type}')">✕</div>`:`<div style="width:26px;flex-shrink:0"></div>`;
+  return `<div class="var-row"><div class="var-n">${idx+1}</div><textarea placeholder="${type==='ttl'?'Notification title...':'Message body...'}" oninput="updatePreview()">${val||''}</textarea>${del}</div>`;
+}
+
+function addVar(type) {
+  const c=document.getElementById(type+'Vars');
+  const idx=c.children.length;
+  const d=document.createElement('div');
+  d.className='var-row';
+  d.innerHTML=`<div class="var-n">${idx+1}</div><textarea placeholder="${type==='ttl'?'Notification title...':'Message body...'}" oninput="updatePreview()"></textarea><div class="var-del" onclick="delVar(this,'${type}')">✕</div>`;
+  c.appendChild(d);
+  d.querySelector('textarea').addEventListener('input',updatePreview);
+  d.querySelector('textarea').focus();
+  updatePreview();
+}
+
+function delVar(btn,type) {
+  btn.parentElement.remove();
+  document.querySelectorAll(`#${type}Vars .var-n`).forEach((n,i)=>n.textContent=i+1);
+  updatePreview();
+}
+
+function tPill(el) {
+  const g=el.dataset.g;
+  const all=el.dataset.v==='All'||el.dataset.v==='None';
+  if(all) {el.parentElement.querySelectorAll('.pill').forEach(p=>p.classList.remove('on'));el.classList.add('on');}
+  else {
+    const ap=el.parentElement.querySelector('.pill[data-v="All"],.pill[data-v="None"]');
+    if(ap) ap.classList.remove('on');
+    el.classList.toggle('on');
+    if(!el.parentElement.querySelector('.pill.on')&&ap) ap.classList.add('on');
+  }
+  updatePreview();
+}
+
+function setTime(t) {
+  const ev=EVENTS.find(e=>e.id===curId);
+  document.getElementById('tEvt').className='tgl'+(t==='event'?' on':'');
+  document.getElementById('tSet').className='tgl'+(t==='set'?' on-set':'');
+  document.getElementById('schedRow').className='appear-row'+(t==='set'?' show':'');
+  document.getElementById('timeHint').textContent=t==='set'
+    ?'Fires at a scheduled delay — set value and unit below.'
+    :'Fires instantly the moment the trigger condition is met.';
+  if(ev) ev.appearTime=t;
+  updatePreview();
+}
+
+function setPhase(p) {
+  const ev=EVENTS.find(e=>e.id===curId); if(!ev) return;
+  ev.phase=p;
+  document.querySelectorAll('.ph-btn').forEach(b=>{b.className='ph-btn';});
+  document.querySelectorAll('.ph-btn').forEach(b=>{
+    if(b.textContent==='Active'&&p==='Active') b.classList.add('on-a');
+    if(b.textContent==='Phase 2'&&p==='Phase 2') b.classList.add('on-p2');
+    if(b.textContent==='Paused'&&p==='Paused') b.classList.add('on-pause');
+  });
+}
+
+function insVar(v) {
+  const last=[...document.querySelectorAll('#bdyVars textarea')].pop();
+  if(!last) return;
+  const s=last.selectionStart,e=last.selectionEnd;
+  last.value=last.value.slice(0,s)+v+last.value.slice(e);
+  last.selectionStart=last.selectionEnd=s+v.length;
+  last.focus(); updatePreview();
+}
+
+// ═══════════════════════ PREVIEW ═══════════════════════
+function updatePreview() {
+  const ev=EVENTS.find(e=>e.id===curId);
+  if(ev&&ev.tc==='learn'){updLearnPreview();return;}
+  if(ev&&ev.tc==='test_score'){updTestPreview();return;}
+  const title=document.querySelector('#ttlVars textarea')?.value||'';
+  const body=document.querySelector('#bdyVars textarea')?.value||'';
+  const cta=document.getElementById('fCTA')?.value||'';
+  const style=document.getElementById('fStyle')?.value||'';
+  const dl=document.getElementById('fDL')?.value||'';
+  const aud=[...document.querySelectorAll('#audPills .pill.on')].map(p=>p.dataset.v).join(', ')||'All';
+  const bCount=document.querySelectorAll('#bdyVars textarea').length;
+  const isSet=document.getElementById('tSet')?.classList.contains('on-set');
+  let timing='⚡ Event Time';
+  if(isSet) {
+    const v=document.getElementById('fSchedVal')?.value||'';
+    const u=document.getElementById('fSchedUnit')?.value||'';
+    timing=v?`⏰ ${v} ${u}`:'⏰ Set Time';
+  }
+
+  document.getElementById('pvStyle').textContent=style||'—';
+  document.getElementById('pvAud').textContent=aud;
+  document.getElementById('pvTime').textContent=timing;
+  document.getElementById('pvDL').textContent=dl||'—';
+  document.getElementById('pvVC').textContent=bCount+' variant'+(bCount!==1?'s':'');
+
+  const tTxt=title||'Notification title...';
+  const bTxt=body||'Message body here...';
+  const box=document.getElementById('pvBox');
+
+  if(style.includes('Toast')) {
+    box.innerHTML=`<div class="pv-toast"><div style="font-size:22px">🔔</div><div><div class="pv-toast-txt">${bTxt}</div><div class="pv-toast-sub">brritto · now</div></div></div>`;
+  } else if(style.includes('Splash')) {
+    box.innerHTML=`<div class="pv-splash"><div class="pv-splash-e">🎉</div><div class="pv-splash-t">${tTxt}</div><div class="pv-splash-b">${bTxt}</div>${cta?`<div class="pv-splash-cta">${cta}</div>`:''}</div>`;
+  } else {
+    box.innerHTML=`<div class="pv-push"><div class="pv-push-top"><div class="pv-app-ico">B</div><div class="pv-app-name">Brritto</div><div class="pv-app-time">now</div></div><div class="pv-push-title">${tTxt}</div><div class="pv-push-body">${bTxt}</div>${cta?`<div class="pv-cta">${cta}</div>`:''}</div>`;
+  }
+}
+
+// ═══════════════════════ SAVE ═══════════════════════
+function saveEvt() {
+  const ev=EVENTS.find(e=>e.id===curId); if(!ev) return;
+  const g=id=>{const el=document.getElementById(id);return el?el.value:'';};
+  if(ev.trigType==='config') {
+    const v=ev.tv;
+    if(ev.tc==='days_signup') v.days=g('tf1');
+    if(ev.tc==='learn'){
+      v.rules=[...document.querySelectorAll('#learnRules .lr-card')].map(card=>{
+        const lists=card.querySelectorAll('.lr-var-list');
+        return {
+          count:card.querySelector('.lr-count').value,
+          type:card.querySelector('.lr-type').value,
+          titles:[...lists[0].querySelectorAll('textarea')].map(t=>t.value).filter(Boolean),
+          bodies:[...lists[1].querySelectorAll('textarea')].map(t=>t.value).filter(Boolean),
+        };
+      });
+    }
+    if(ev.tc==='test_score'){
+      v.rules=[...document.querySelectorAll('#testRules .lr-card')].map(card=>{
+        const lists=card.querySelectorAll('.lr-var-list');
+        return {
+          op:card.querySelector('.tr-op').value,
+          score:card.querySelector('.tr-score').value,
+          titles:[...lists[0].querySelectorAll('textarea')].map(t=>t.value).filter(Boolean),
+          bodies:[...lists[1].querySelectorAll('textarea')].map(t=>t.value).filter(Boolean),
+        };
+      });
+    }
+    if(ev.tc==='exam_hours'){v.hours=g('tf1');v.dir=g('tf2');}
+    if(ev.tc==='interval'){v.days=g('tf1');v.unit=g('tf2');}
+    if(ev.tc==='inactive') v.days=g('tf1');
+    if(ev.tc==='expiry') v.days=g('tf1');
+    if(ev.tc==='trial_exp') v.days=g('tf1');
+    if(ev.tc==='trial_offer') v.days=g('tf1');
+  }
+  ev.deliveryTarget = document.getElementById('dtBcast')?.classList.contains('on-set') ? 'broadcast' : 'individual';
+  ev.aud=[...document.querySelectorAll('#audPills .pill.on')].map(p=>p.dataset.v);
+  ev.subAud=[...document.querySelectorAll('#subPills .pill.on')].map(p=>p.dataset.v);
+  ev.style=g('fStyle')||ev.style;
+  ev.appearTime=document.getElementById('tSet')?.classList.contains('on-set')?'set':'event';
+  ev.scheduleVal=g('fSchedVal');
+  ev.scheduleUnit=g('fSchedUnit');
+  ev.titles=[...document.querySelectorAll('#ttlVars textarea')].map(t=>t.value).filter(Boolean);
+  ev.bodies=[...document.querySelectorAll('#bdyVars textarea')].map(t=>t.value).filter(Boolean);
+  ev.cta=g('fCTA'); ev.dl=g('fDL')||ev.dl;
+  const isRuleBased = ev.tc==='learn' || ev.tc==='test_score';
+  if(!isRuleBased && !ev.bodies.length){toast('Add at least one message body','err');return;}
+  toast('Configuration saved!','ok');
+}
+
+let tt;
+function toast(msg,t='ok') {
+  const el=document.getElementById('toast');
+  document.getElementById('tm').textContent=msg;
+  document.getElementById('ti').textContent=t==='ok'?'✓':'✕';
+  el.className='toast show '+t;
+  clearTimeout(tt); tt=setTimeout(()=>el.classList.remove('show'),3000);
+}
+
+renderList();
+</script>
+</body>
+</html>
