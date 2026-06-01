@@ -324,10 +324,9 @@ textarea { resize: vertical; min-height: 70px; line-height: 1.6; }
 
     <!-- LIST VIEW -->
     <div id="viewList">
-      <div class="stats-row">
+      <div class="stats-row" style="grid-template-columns:repeat(3,1fr)">
         <div class="stat-card s-blue"><div class="sc-label">Total Events</div><div class="sc-val" id="stT">15</div><div class="sc-sub">All categories</div></div>
         <div class="stat-card s-green"><div class="sc-label">Active</div><div class="sc-val" id="stA">12</div><div class="sc-sub">Live &amp; firing</div></div>
-        <div class="stat-card s-purple"><div class="sc-label">Changed</div><div class="sc-val" id="stP">1</div><div class="sc-sub">Modified from PRD</div></div>
         <div class="stat-card s-orange"><div class="sc-label">Paused</div><div class="sc-val" id="stPa">0</div><div class="sc-sub">Temporarily off</div></div>
       </div>
       <div id="listBody"></div>
@@ -579,7 +578,6 @@ function renderList() {
   document.getElementById('listBody').innerHTML=h;
   document.getElementById('stT').textContent=EVENTS.length;
   document.getElementById('stA').textContent=EVENTS.filter(e=>e.phase==='Active').length;
-  document.getElementById('stP').textContent=EVENTS.filter(e=>e.changed).length;
   document.getElementById('stPa').textContent=EVENTS.filter(e=>e.phase==='Paused').length;
 }
 
