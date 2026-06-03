@@ -166,12 +166,17 @@ textarea { resize: vertical; min-height: 76px; line-height: 1.65; }
 .trig-preview { background: var(--bg); border: 1px solid var(--border); border-radius: 8px; padding: 12px 14px; margin-top: 14px; font-size: 13px; color: var(--t2); line-height: 1.65; }
 .trig-preview .b { background: rgba(77,130,244,.18); color: var(--accent); padding: 2px 8px; border-radius: 5px; font-weight: 700; }
 
-/* VARIANTS */
-.variants { display: flex; flex-direction: column; gap: 8px; margin-bottom: 10px; }
-.var-row { display: flex; gap: 8px; align-items: flex-start; }
-.var-n { min-width: 22px; height: 22px; border-radius: 6px; background: var(--card2); border: 1px solid var(--border); display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; color: var(--t3); margin-top: 11px; flex-shrink: 0; }
-.var-del { width: 28px; height: 28px; flex-shrink: 0; margin-top: 10px; border-radius: 6px; background: transparent; border: 1px solid transparent; color: var(--t3); cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 13px; transition: all .15s; }
-.var-del:hover { background: var(--red-dim); border-color: rgba(248,113,113,.25); color: var(--red); }
+/* VARIANT PAIR CARDS */
+.vp-list { display: flex; flex-direction: column; gap: 8px; margin-bottom: 10px; }
+.vp-card { background: var(--bg); border: 1px solid var(--border); border-radius: 10px; overflow: hidden; }
+.vp-head { display: flex; align-items: center; justify-content: space-between; padding: 8px 12px; background: var(--card2); border-bottom: 1px solid var(--border); }
+.vp-badge { font-size: 11.5px; font-weight: 700; color: var(--t2); }
+.vp-del { width: 24px; height: 24px; border-radius: 5px; display: flex; align-items: center; justify-content: center; font-size: 12px; color: var(--t3); cursor: pointer; border: 1px solid transparent; transition: all .15s; flex-shrink: 0; }
+.vp-del:hover { background: var(--red-dim); border-color: rgba(248,113,113,.25); color: var(--red); }
+.vp-content { padding: 12px 14px; }
+.vp-lbl { font-size: 11.5px; font-weight: 600; color: var(--t3); display: block; margin-bottom: 5px; }
+.vp-content input[type=text] { font-size: 13px; }
+.vp-content textarea { min-height: 66px; font-size: 13px; }
 .add-var { display: inline-flex; align-items: center; gap: 7px; color: var(--accent); font-size: 13px; font-weight: 600; cursor: pointer; padding: 8px 0; opacity: .85; transition: opacity .15s; }
 .add-var:hover { opacity: 1; }
 
@@ -410,148 +415,211 @@ const PACKAGES = [
 ];
 
 let EVENTS = [
-  { id:1, cat:'Onboarding', name:'Welcome / Sign-up', changed:false, deliveryTarget:'individual',
+  { id:1, cat:'Onboarding', name:'Welcome / Sign-up', deliveryTarget:'individual',
     trigType:'auto', autoDesc:'Fires instantly when a student completes signup. No condition to configure.',
     aud:['All'], subAud:['All'], style:'Splash Screen + Push',
     appearTime:'event', scheduleVal:'', scheduleUnit:'hours',
-    titles:['Welcome to Brritto, {{student_name}}! 🎉'],
-    bodies:['হাই {{student_name}}, Brritto-তে স্বাগতম! 🎉 চলো, পড়াশোনাকে সহজ করি।','তোমাকে পেয়ে আমরা খুশি! পড়াশোনা শুরু করতে প্রস্তুত?','Brritto-তে তোমার যাত্রা শুরু হোক আজই! 🚀'],
+    variants:[
+      {title:'Welcome to Brritto, {{student_name}}! 🎉', body:'হাই {{student_name}}, Brritto-তে স্বাগতম! 🎉 চলো, পড়াশোনাকে সহজ করি।'},
+      {title:'তোমাকে পেয়ে আমরা খুশি! 😊', body:'তোমাকে পেয়ে আমরা খুশি! পড়াশোনা শুরু করতে প্রস্তুত?'},
+      {title:'যাত্রা শুরু হোক আজই! 🚀', body:'Brritto-তে তোমার যাত্রা শুরু হোক আজই!'},
+    ],
     cta:'Start Learning', dl:'brritto://home', phase:'Active',
     vars:['{{student_name}}'] },
 
-  { id:2, cat:'Onboarding', name:'Profile Incomplete Reminder', changed:false, deliveryTarget:'individual',
+  { id:2, cat:'Onboarding', name:'Profile Incomplete Reminder', deliveryTarget:'individual',
     trigType:'config', tc:'days_signup', tv:{days:'1'},
     aud:['All'], subAud:['All'], style:'Push + Inbox',
     appearTime:'set', scheduleVal:'1', scheduleUnit:'days after signup',
-    titles:['প্রোফাইল অসম্পূর্ণ রয়েছে ⚠️'],
-    bodies:['কিছু তথ্য দিতে বাকি আছে। প্রোফাইল সম্পন্ন করো!','প্রোফাইল শেষ করলে কোর্সে ভর্তি হওয়া সহজ হবে!','মাত্র কয়েক সেকেন্ড লাগবে — প্রোফাইল সম্পন্ন করো!'],
+    variants:[
+      {title:'প্রোফাইল অসম্পূর্ণ রয়েছে ⚠️', body:'কিছু তথ্য দিতে বাকি আছে। প্রোফাইল সম্পন্ন করো!'},
+      {title:'প্রোফাইল শেষ করো! ✏️', body:'প্রোফাইল শেষ করলে কোর্সে ভর্তি হওয়া সহজ হবে!'},
+      {title:'মাত্র কয়েক সেকেন্ড লাগবে! ⚡', body:'মাত্র কয়েক সেকেন্ড লাগবে — প্রোফাইল সম্পন্ন করো!'},
+    ],
     cta:'প্রোফাইল আপডেট', dl:'brritto://profile/edit', phase:'Active', vars:[] },
 
-  { id:3, cat:'Onboarding', name:'Profile Completion Confirmed', changed:false, deliveryTarget:'individual',
+  { id:3, cat:'Onboarding', name:'Profile Completion Confirmed', deliveryTarget:'individual',
     trigType:'auto', autoDesc:'Fires instantly when all required profile fields are filled.',
     aud:['All'], subAud:['Package'], style:'Push + Inbox',
     appearTime:'event', scheduleVal:'', scheduleUnit:'hours',
-    titles:['প্রোফাইল সম্পন্ন! ✅'],
-    bodies:['তোমার প্রোফাইল তৈরি হয়েছে। এখন পড়াশোনা শুরু করো!','সব তথ্য দেওয়া হয়ে গেছে। কোর্স বেছে নাও!'],
+    variants:[
+      {title:'প্রোফাইল সম্পন্ন! ✅', body:'তোমার প্রোফাইল তৈরি হয়েছে। এখন পড়াশোনা শুরু করো!'},
+      {title:'সব তথ্য দেওয়া হয়ে গেছে! 🎉', body:'সব তথ্য দেওয়া হয়ে গেছে। কোর্স বেছে নাও!'},
+    ],
     cta:'হোমে যাও', dl:'brritto://home', phase:'Active', vars:[] },
 
-  { id:4, cat:'Learn', name:'Learn Activity Toast', changed:false, deliveryTarget:'individual',
+  { id:4, cat:'Learn', name:'Learn Activity Toast', deliveryTarget:'individual',
     trigType:'config', tc:'learn',
     tv:{ rules:[
       { count:'5', type:'Correct / Wrong / Attempts',
-        titles:['🔥 দারুণ করছ!', '⭐ অসাধারণ!'],
-        bodies:['🔥 {{count}} টি সঠিক উত্তর! দারুণ করছ!','একটানা {{count}} টি! চালিয়ে যাও 💪'] },
+        variants:[
+          {title:'🔥 দারুণ করছ!', body:'🔥 {{count}} টি সঠিক উত্তর! দারুণ করছ!'},
+          {title:'⭐ অসাধারণ!', body:'একটানা {{count}} টি! চালিয়ে যাও 💪'},
+        ]},
       { count:'10', type:'Correct / Wrong / Attempts',
-        titles:['একটানা {{count}} টি! 🎯'],
-        bodies:['একটানা {{count}} টি সঠিক! চালিয়ে যাও!','{{count}} টি প্রশ্ন শেষ! 🎯 আরও এগিয়ে যাও!','তুমি দারুণ করছ! {{count}} পর্যন্ত এলে 🚀'] },
+        variants:[
+          {title:'একটানা {{count}} টি! 🎯', body:'একটানা {{count}} টি সঠিক! চালিয়ে যাও!'},
+          {title:'দারুণ! 🚀', body:'{{count}} টি প্রশ্ন শেষ! 🎯 আরও এগিয়ে যাও!'},
+        ]},
       { count:'20', type:'Correct / Wrong / Attempts',
-        titles:['WOW! {{count}} টি! 🏆'],
-        bodies:['অবিশ্বাস্য! {{count}} টি একটানা! তুমি আজ আগুন 🔥','{{count}} পর্যন্ত গেছ! তোমাকে আটকায় কে! 🏆'] },
+        variants:[
+          {title:'WOW! {{count}} টি! 🏆', body:'অবিশ্বাস্য! {{count}} টি একটানা! তুমি আজ আগুন 🔥'},
+          {title:'তোমাকে আটকায় কে! 🏆', body:'{{count}} পর্যন্ত গেছ! তোমাকে আটকায় কে! 🏆'},
+        ]},
     ]},
     aud:['Admission'], subAud:['Course'], style:'In-App Toast',
     appearTime:'event', scheduleVal:'', scheduleUnit:'hours',
-    titles:[], bodies:[],
+    variants:[],
     cta:'', dl:'brritto://courses', phase:'Active', vars:['{{count}}'],
-    note:'Toast only — no title shown to student. Each milestone rule fires its own random message.' },
+    note:'Toast only — in-app only. Each milestone rule fires a random variant pair.' },
 
-  { id:5, cat:'Test', name:'Test Result Notification', changed:false, deliveryTarget:'individual',
+  { id:5, cat:'Test', name:'Test Result Notification', deliveryTarget:'individual',
     trigType:'config', tc:'test_score',
     tv:{ rules:[
       { op:'>=', score:'80',
-        titles:['{{testTitle}} — অসাধারণ! 🏆'],
-        bodies:['তুমি {{score}}% পেয়েছ! অসাধারণ 🏆','দারুণ ফলাফল! {{score}}% পেয়েছ। এভাবে চালিয়ে যাও!'] },
+        variants:[
+          {title:'{{testTitle}} — অসাধারণ! 🏆', body:'তুমি {{score}}% পেয়েছ! অসাধারণ 🏆'},
+          {title:'অসাধারণ ফলাফল! 🌟', body:'দারুণ ফলাফল! {{score}}% পেয়েছ। এভাবে চালিয়ে যাও!'},
+        ]},
       { op:'>=', score:'50',
-        titles:['{{testTitle}} — ভালো চেষ্টা! 📝'],
-        bodies:['{{score}}% — দারুণ চেষ্টা! আরও পড়লে আরও ভালো হবে','এবার {{score}}% পেয়েছ। আবার দিলে আরও ভালো করবে! 💪'] },
+        variants:[
+          {title:'{{testTitle}} — ভালো চেষ্টা! 📝', body:'{{score}}% — দারুণ চেষ্টা! আরও পড়লে আরও ভালো হবে'},
+          {title:'ভালো করেছ! 💪', body:'এবার {{score}}% পেয়েছ। আবার দিলে আরও ভালো করবে! 💪'},
+        ]},
       { op:'>=', score:'30',
-        titles:['{{testTitle}} — ফলাফল এসেছে 📝'],
-        bodies:['তুমি {{score}}% পেয়েছ। হাল ছেড়ো না, চেষ্টা চালিয়ে যাও!','{{score}}% পেয়েছ — আরেকবার দাও, পারবে! 💪'] },
+        variants:[
+          {title:'{{testTitle}} — ফলাফল এসেছে 📝', body:'তুমি {{score}}% পেয়েছ। হাল ছেড়ো না, চেষ্টা চালিয়ে যাও!'},
+          {title:'ফলাফল এসেছে! 📋', body:'{{score}}% পেয়েছ — আরেকবার দাও, পারবে! 💪'},
+        ]},
     ]},
     aud:['All'], subAud:['All'], style:'Splash Screen',
     appearTime:'event', scheduleVal:'', scheduleUnit:'hours',
-    titles:[], bodies:[],
+    variants:[],
     cta:'ফলাফল দেখো', dl:'brritto://test/{{testId}}/results', phase:'Active', vars:['{{testTitle}}','{{score}}','{{testId}}'] },
 
   { id:6, cat:'Doubt', name:'Doubt Solved', deliveryTarget:'individual',
     trigType:'auto', autoDesc:'Fires instantly when a teacher marks a student\'s doubt as solved.',
     aud:['All'], subAud:['All'], style:'Push + Inbox',
     appearTime:'event', scheduleVal:'', scheduleUnit:'hours',
-    titles:['তোমার প্রশ্নের উত্তর এসেছে! ✅'],
-    bodies:['"{{doubtTitle}}" এর সমাধান পাওয়া গেছে। এখনই দেখো!','তোমার প্রশ্নের জবাব দেওয়া হয়েছে! সমাধান দেখতে ক্লিক করো','সমাধান এসে গেছে! "{{doubtTitle}}" — এখনই পড়ো 📖'],
+    variants:[
+      {title:'তোমার প্রশ্নের উত্তর এসেছে! ✅', body:'"{{doubtTitle}}" এর সমাধান পাওয়া গেছে। এখনই দেখো!'},
+      {title:'সমাধান এসে গেছে! 📖', body:'তোমার প্রশ্নের জবাব দেওয়া হয়েছে! সমাধান দেখতে ক্লিক করো'},
+      {title:'"{{doubtTitle}}" — উত্তর পাওয়া গেছে!', body:'সমাধান এসে গেছে! "{{doubtTitle}}" — এখনই পড়ো 📖'},
+    ],
     cta:'সমাধান দেখো', dl:'brritto://doubt/{{doubtId}}', phase:'Active', vars:['{{doubtTitle}}','{{doubtId}}'] },
 
-  { id:7, cat:'Live Exam', name:'Live Exam Reminder', changed:false, deliveryTarget:'individual',
+  { id:7, cat:'Live Exam', name:'Live Exam Reminder', deliveryTarget:'individual',
     trigType:'config', tc:'exam_hours', tv:{dir:'before', hours:'24'},
     aud:['All'], subAud:['All'], style:'Push + Inbox',
     appearTime:'set', scheduleVal:'24', scheduleUnit:'hours before exam',
-    titles:['আগামীকাল পরীক্ষা! ⏰'],
-    bodies:['{{examTitle}} আগামীকাল {{examTime}} এ শুরু হবে। প্রস্তুত থেকো!','মাত্র ২৪ ঘণ্টা বাকি! {{examTitle}} — এখনই প্রস্তুতি নাও','কাল পরীক্ষা! সময় মতো অংশ নিতে ভুলো না 📝'],
+    variants:[
+      {title:'আগামীকাল পরীক্ষা! ⏰', body:'{{examTitle}} আগামীকাল {{examTime}} এ শুরু হবে। প্রস্তুত থেকো!'},
+      {title:'মাত্র ২৪ ঘণ্টা বাকি! ⚡', body:'মাত্র ২৪ ঘণ্টা বাকি! {{examTitle}} — এখনই প্রস্তুতি নাও'},
+      {title:'কাল পরীক্ষা! ভুলো না 📝', body:'কাল পরীক্ষা! সময় মতো অংশ নিতে ভুলো না 📝'},
+    ],
     cta:'বিস্তারিত দেখো', dl:'brritto://live-exam/{{examId}}', phase:'Active', vars:['{{examTitle}}','{{examTime}}','{{examId}}'] },
 
-  { id:8, cat:'Live Exam', name:'Result Published', changed:false, deliveryTarget:'individual',
+  { id:8, cat:'Live Exam', name:'Result Published', deliveryTarget:'individual',
     trigType:'auto', autoDesc:'Fires when admin publishes exam results. Sends only to students who submitted.',
     aud:['All'], subAud:['All'], style:'Push + Inbox',
     appearTime:'event', scheduleVal:'', scheduleUnit:'hours',
-    titles:['ফলাফল প্রকাশিত! 🏆'],
-    bodies:['{{examTitle}} এর ফলাফল দেখো — তুমি কত পেয়েছ?','ফলাফল এসে গেছে! এখনই দেখো 👀','তোমার {{examTitle}} ফলাফল এখন দেখা যাচ্ছে!'],
+    variants:[
+      {title:'ফলাফল প্রকাশিত! 🏆', body:'{{examTitle}} এর ফলাফল দেখো — তুমি কত পেয়েছ?'},
+      {title:'ফলাফল এসে গেছে! 👀', body:'ফলাফল এসে গেছে! এখনই দেখো 👀'},
+      {title:'{{examTitle}} ফলাফল দেখো!', body:'তোমার {{examTitle}} ফলাফল এখন দেখা যাচ্ছে!'},
+    ],
     cta:'ফলাফল দেখো', dl:'brritto://live-exam/{{examId}}/results', phase:'Active', vars:['{{examTitle}}','{{examId}}'] },
 
-  { id:9, cat:'Course', name:'Course Enrolled', changed:false, deliveryTarget:'individual',
+  { id:9, cat:'Course', name:'Course Enrolled', deliveryTarget:'individual',
     trigType:'auto', autoDesc:'Fires instantly when a student successfully enrolls in any course.',
     aud:['All'], subAud:['Course'], style:'Push + Inbox',
     appearTime:'event', scheduleVal:'', scheduleUnit:'hours',
-    titles:['কোর্সে ভর্তি সম্পন্ন! 🎓'],
-    bodies:['তুমি {{courseName}} এ ভর্তি হয়েছ। পড়াশোনা শুরু করো!','{{courseName}} — তোমার নতুন যাত্রা শুরু হোক আজই!','ভর্তি সম্পন্ন! {{courseName}} এখন তোমার জন্য প্রস্তুত 📚'],
+    variants:[
+      {title:'কোর্সে ভর্তি সম্পন্ন! 🎓', body:'তুমি {{courseName}} এ ভর্তি হয়েছ। পড়াশোনা শুরু করো!'},
+      {title:'{{courseName}} — শুরু হোক আজই!', body:'{{courseName}} — তোমার নতুন যাত্রা শুরু হোক আজই!'},
+      {title:'ভর্তি সম্পন্ন! 📚', body:'ভর্তি সম্পন্ন! {{courseName}} এখন তোমার জন্য প্রস্তুত 📚'},
+    ],
     cta:'কোর্স শুরু করো', dl:'brritto://course/{{courseId}}', phase:'Active', vars:['{{courseName}}','{{courseId}}'] },
 
-  { id:10, cat:'Course', name:'Course Completed', changed:false, deliveryTarget:'individual',
+  { id:10, cat:'Course', name:'Course Completed', deliveryTarget:'individual',
     trigType:'auto', autoDesc:'Fires when a student completes 100% of all course content.',
     aud:['All'], subAud:['Course'], style:'Push + Inbox',
     appearTime:'event', scheduleVal:'', scheduleUnit:'hours',
-    titles:['কোর্স সম্পন্ন! 🎉'],
-    bodies:['অভিনন্দন! তুমি {{courseName}} সফলভাবে শেষ করেছ!','{{courseName}} শেষ! সার্টিফিকেট নেওয়ার সময় এসেছে 🏅','তুমি করে দেখালে! {{courseName}} সম্পন্ন — অসাধারণ! 🎊'],
+    variants:[
+      {title:'কোর্স সম্পন্ন! 🎉', body:'অভিনন্দন! তুমি {{courseName}} সফলভাবে শেষ করেছ!'},
+      {title:'সার্টিফিকেট নেওয়ার সময়! 🏅', body:'{{courseName}} শেষ! সার্টিফিকেট নেওয়ার সময় এসেছে 🏅'},
+      {title:'তুমি করে দেখালে! 🎊', body:'তুমি করে দেখালে! {{courseName}} সম্পন্ন — অসাধারণ! 🎊'},
+    ],
     cta:'সার্টিফিকেট নাও', dl:'brritto://course/{{courseId}}/certificate', phase:'Active', vars:['{{courseName}}','{{courseId}}'] },
 
-  { id:11, cat:'Course', name:'Package Recommendation', changed:false, deliveryTarget:'broadcast',
+  { id:11, cat:'Course', name:'Package Recommendation', deliveryTarget:'broadcast',
     trigType:'config', tc:'interval', tv:{days:'7', unit:'Days'},
     aud:['All'], subAud:['None'], style:'Push + Inbox',
     appearTime:'set', scheduleVal:'7', scheduleUnit:'days interval',
-    titles:['তোমার জন্য নতুন কোর্স! 📚'],
-    bodies:['তোমার পছন্দ অনুযায়ী এই কোর্সগুলো দেখো!','নতুন কোর্স যোগ হয়েছে — তোমার জন্য বেছে রেখেছি!','পড়াশোনাকে আরও এগিয়ে নিতে এই কোর্সটি দেখো 👇'],
+    variants:[
+      {title:'তোমার জন্য নতুন কোর্স! 📚', body:'তোমার পছন্দ অনুযায়ী এই কোর্সগুলো দেখো!'},
+      {title:'নতুন কোর্স যোগ হয়েছে! ✨', body:'নতুন কোর্স যোগ হয়েছে — তোমার জন্য বেছে রেখেছি!'},
+      {title:'পড়াশোনা এগিয়ে নাও! 👇', body:'পড়াশোনাকে আরও এগিয়ে নিতে এই কোর্সটি দেখো 👇'},
+    ],
     cta:'কোর্স দেখো', dl:'brritto://courses', phase:'Active', vars:[],
     note:'Targets users not enrolled in any package.' },
 
-  { id:12, cat:'Retention', name:'User Inactive', changed:false, deliveryTarget:'broadcast',
-    trigType:'config', tc:'inactive', tv:{days:'3'},
+  { id:12, cat:'Retention', name:'User Inactive', deliveryTarget:'broadcast',
+    trigType:'config', tc:'retention_stages',
+    tv:{ stages:[
+      { days:'1', variants:[
+        {title:'তোমাকে মিস করছি! 😔', body:'আজ পড়াশোনা করোনি। একটু পড়লে কেমন হয়?'},
+        {title:'ফিরে এসো! 👋', body:'তোমার পড়াশোনা থমকে আছে। আজই ফিরে এসো!'},
+      ]},
+      { days:'3', variants:[
+        {title:'৩ দিন হয়ে গেছে! 😟', body:'পরীক্ষার জন্য সময় কম। আজই একটু পড়ো! 📖'},
+        {title:'প্রতিযোগীরা এগিয়ে যাচ্ছে! ⚡', body:'তুমি ৩ দিন পড়াশোনা করোনি। এখনই ফিরে এসো!'},
+      ]},
+      { days:'7', variants:[
+        {title:'১ সপ্তাহ পার হয়ে গেছে! 😢', body:'তোমার লক্ষ্য পূরণ করতে আজই ফিরে এসো!'},
+        {title:'তোমাকে দেখতে চাই! 🙏', body:'এক সপ্তাহ পড়াশোনা করোনি — এখনও দেরি হয়নি!'},
+      ]},
+      { days:'14', variants:[
+        {title:'দুই সপ্তাহ চলে গেছে! 💔', body:'প্রতিযোগীরা এগিয়ে যাচ্ছে। তুমি কি পিছিয়ে থাকবে?'},
+        {title:'শেষবারের মতো ডাকছি! 🔔', body:'তোমার কোর্স অপেক্ষা করছে। আজই ফিরে এসো!'},
+      ]},
+    ]},
     aud:['All'], subAud:['None'], style:'Push',
-    appearTime:'set', scheduleVal:'3', scheduleUnit:'days inactive',
-    titles:['তোমাকে মিস করছি! 😔'],
-    bodies:['আজ পড়াশোনা করোনি। একটু পড়লে কেমন হয়?','তোমার পড়াশোনা থমকে আছে। আজই ফিরে এসো!','পরীক্ষার জন্য সময় কম। আজই একটু পড়ো! 📖','তোমার লক্ষ্য পূরণ করতে আজই ফিরে এসো!','প্রতিযোগীরা এগিয়ে যাচ্ছে। তুমি কি পিছিয়ে থাকবে?'],
+    appearTime:'set', scheduleVal:'', scheduleUnit:'days inactive',
+    variants:[],
     cta:'পড়াশোনায় ফিরি', dl:'brritto://home', phase:'Active', vars:[],
-    note:'Create multiple entries for escalating stages: 1 day, 3 days, 7 days, 14 days. Resets on any app open.' },
+    note:'Multi-stage retention series. Each stage fires after the set number of inactive days. Resets when student opens the app.' },
 
-  { id:13, cat:'Subscription', name:'Subscription Expiry Warning', changed:false, deliveryTarget:'individual',
+  { id:13, cat:'Subscription', name:'Subscription Expiry Warning', deliveryTarget:'individual',
     trigType:'config', tc:'expiry', tv:{days:'7'},
     aud:['All'], subAud:['Package'], style:'Push + Inbox',
     appearTime:'set', scheduleVal:'7', scheduleUnit:'days before expiry',
-    titles:['সাবস্ক্রিপশন শেষ হচ্ছে! ⚠️'],
-    bodies:['তোমার {{packageName}} এর মেয়াদ {{daysLeft}} দিনে শেষ হবে।','{{daysLeft}} দিন বাকি! {{packageName}} নবায়ন করো','সময় শেষ হওয়ার আগেই সাবস্ক্রিপশন নবায়ন করে নাও!'],
+    variants:[
+      {title:'সাবস্ক্রিপশন শেষ হচ্ছে! ⚠️', body:'তোমার {{packageName}} এর মেয়াদ {{daysLeft}} দিনে শেষ হবে।'},
+      {title:'{{daysLeft}} দিন বাকি! ⏳', body:'{{daysLeft}} দিন বাকি! {{packageName}} নবায়ন করো'},
+      {title:'সময় শেষ হওয়ার আগেই নবায়ন করো!', body:'সময় শেষ হওয়ার আগেই সাবস্ক্রিপশন নবায়ন করে নাও!'},
+    ],
     cta:'নবায়ন করো', dl:'brritto://subscription', phase:'Paused', vars:['{{packageName}}','{{daysLeft}}'] },
 
-  { id:14, cat:'Subscription', name:'Free Trial Expiry', changed:false, deliveryTarget:'individual',
+  { id:14, cat:'Subscription', name:'Free Trial Expiry', deliveryTarget:'individual',
     trigType:'config', tc:'trial_exp', tv:{days:'3'},
     aud:['All'], subAud:['None'], style:'Push + Inbox',
     appearTime:'set', scheduleVal:'3', scheduleUnit:'days before trial ends',
-    titles:['ফ্রি ট্রায়াল শেষ হচ্ছে!'],
-    bodies:['তোমার ফ্রি ট্রায়াল {{daysLeft}} দিনে শেষ হবে। এখনই আপগ্রেড করো!','আর মাত্র {{daysLeft}} দিন! প্রিমিয়াম চালিয়ে যেতে সাবস্ক্রাইব করো।'],
+    variants:[
+      {title:'ফ্রি ট্রায়াল শেষ হচ্ছে!', body:'তোমার ফ্রি ট্রায়াল {{daysLeft}} দিনে শেষ হবে। এখনই আপগ্রেড করো!'},
+      {title:'আর মাত্র {{daysLeft}} দিন! ⚡', body:'আর মাত্র {{daysLeft}} দিন! প্রিমিয়াম চালিয়ে যেতে সাবস্ক্রাইব করো।'},
+    ],
     cta:'প্ল্যান দেখো', dl:'brritto://subscription', phase:'Paused', vars:['{{daysLeft}}'] },
 
-  { id:15, cat:'Subscription', name:'Free Trial Offer', changed:false, deliveryTarget:'broadcast',
+  { id:15, cat:'Subscription', name:'Free Trial Offer', deliveryTarget:'broadcast',
     trigType:'config', tc:'trial_offer', tv:{days:'7'},
     aud:['All'], subAud:['None'], style:'Push + Inbox + Splash',
     appearTime:'set', scheduleVal:'', scheduleUnit:'admin sets send date',
-    titles:['ফ্রি ট্রায়াল শুরু করো! 🆓'],
-    bodies:['{{trialDays}} দিনের ফ্রি ট্রায়ালে সব কিছু ব্যবহার করো!','বিনামূল্যে {{trialDays}} দিন Brritto Premium ব্যবহার করো!','ফ্রি ট্রায়াল সুযোগ মিস করো না — {{trialDays}} দিন বিনামূল্যে!'],
+    variants:[
+      {title:'ফ্রি ট্রায়াল শুরু করো! 🆓', body:'{{trialDays}} দিনের ফ্রি ট্রায়ালে সব কিছু ব্যবহার করো!'},
+      {title:'বিনামূল্যে {{trialDays}} দিন! 🎁', body:'বিনামূল্যে {{trialDays}} দিন Brritto Premium ব্যবহার করো!'},
+      {title:'ফ্রি ট্রায়াল মিস করো না! ⏰', body:'ফ্রি ট্রায়াল সুযোগ মিস করো না — {{trialDays}} দিন বিনামূল্যে!'},
+    ],
     cta:'ফ্রি শুরু করো', dl:'brritto://subscription', phase:'Paused', vars:['{{trialDays}}'],
     note:'Manual broadcast — admin sends from Broadcasts panel with a target date.' },
 ];
@@ -606,6 +674,7 @@ function trigSummary(ev) {
   if(ev.tc==='exam_hours') return `${v.hours||'?'} hours ${v.dir||'before'} exam`;
   if(ev.tc==='interval') return `every ${v.days||'?'} ${v.unit||'Days'}`;
   if(ev.tc==='inactive') return `${v.days||'?'} days inactive`;
+  if(ev.tc==='retention_stages') { const s=v.stages||[]; return s.map(st=>`<b>${st.days||'?'}d</b>`).join(' → ')+' inactive'; }
   if(ev.tc==='expiry') return `${v.days||'?'} days before expiry`;
   if(ev.tc==='trial_exp') return `${v.days||'?'} days before trial ends`;
   if(ev.tc==='trial_offer') return `admin-triggered, ${v.days||'?'} day trial`;
@@ -650,6 +719,7 @@ function buildForm(ev) {
   const varChips=(ev.vars||[]).map(v=>`<span class="chip" onclick="insVar('${v}')" title="Insert">${v}</span>`).join('');
   const isLearn = ev.tc==='learn';
   const isTest  = ev.tc==='test_score';
+  const isRetention = ev.tc==='retention_stages';
 
   // Trigger section
   let trigHtml='';
@@ -664,9 +734,8 @@ function buildForm(ev) {
   const schedShow=isSet?'show':'';
   const schedOpts=['hours before','hours after','days after','days before','minutes before'].map(u=>`<option${ev.scheduleUnit===u?' selected':''}>${u}</option>`).join('');
 
-  // Variants
-  const titV=(ev.titles||['']).map((t,i)=>vRow('ttl',i,t)).join('');
-  const bodV=(ev.bodies||['']).map((b,i)=>vRow('bdy',i,b)).join('');
+  // Variant pairs
+  const vpCards=(ev.variants&&ev.variants.length?ev.variants:[{title:'',body:''}]).map((v,i)=>buildVP(i,v)).join('');
 
   document.getElementById('cfgForm').innerHTML=`
 
@@ -727,24 +796,15 @@ function buildForm(ev) {
       </div>
     </div>
 
-    ${(isLearn||isTest) ? '' : `
-    <!-- NOTIFICATION TITLE (non-rule events) -->
+    ${(isLearn||isTest||isRetention) ? '' : `
+    <!-- TITLE & MESSAGE VARIANTS -->
     <div class="f-card">
-      <div class="f-sect">✏️ Title</div>
+      <div class="f-sect">✏️ Title &amp; Message</div>
       <div class="f-group">
-        <label class="f-label">Title options <span class="opt">— system picks one at random each time</span></label>
-        <div class="variants" id="ttlVars">${titV}</div>
-        <div class="add-var" onclick="addVar('ttl')">＋ Add another title</div>
-      </div>
-    </div>
-
-    <div class="f-card">
-      <div class="f-sect">💬 Message</div>
-      <div class="f-group">
-        <label class="f-label">Message options <span class="opt">— system picks one at random each time</span></label>
-        <div class="variants" id="bdyVars">${bodV}</div>
-        <div class="add-var" onclick="addVar('bdy')">＋ Add another message</div>
-        ${varChips?`<div class="chip-row" style="margin-top:10px" id="varChips">${varChips}</div><div class="f-hint" style="margin-top:6px">Click a tag to insert it at the cursor position in your message.</div>`:''}
+        <label class="f-label">Variants <span class="opt">— system picks one title + message pair at random each send</span></label>
+        <div class="vp-list" id="vpList">${vpCards}</div>
+        <div class="add-var" onclick="addVP()">＋ Add another variant</div>
+        ${varChips?`<div class="chip-row" style="margin-top:10px">${varChips}</div><div class="f-hint" style="margin-top:6px">Click a tag to insert it into the message at cursor position.</div>`:''}
       </div>
     </div>`}
 
@@ -778,18 +838,10 @@ function buildForm(ev) {
   `;
 
   setTimeout(()=>{
-    if(isLearn) {
-      updLearnPreview();
-    } else if(isTest) {
-      updTestPreview();
-    } else {
-      document.querySelectorAll('#ttlVars textarea,#bdyVars textarea').forEach(t=>t.addEventListener('input',updatePreview));
-      document.querySelectorAll('#varChips .chip').forEach(c=>c.addEventListener('click',()=>{
-        const last=[...document.querySelectorAll('#bdyVars textarea')].pop();
-        if(last){const s=last.selectionStart,e=last.selectionEnd,v=c.textContent;last.value=last.value.slice(0,s)+v+last.value.slice(e);last.selectionStart=last.selectionEnd=s+v.length;last.focus();updatePreview();}
-      }));
-      updatePreview();
-    }
+    if(isLearn) updLearnPreview();
+    else if(isTest) updTestPreview();
+    else if(isRetention) updRetentionPreview();
+    else updatePreview();
   },20);
 }
 
@@ -891,6 +943,17 @@ function buildTrigFields(ev) {
     </div></div>
     ${tp('Fires after <b class="b" id="tp1">'+(v.days||'3')+'</b> days with no app open')}`;
 
+  if(ev.tc==='retention_stages') {
+    const stages = (v.stages && v.stages.length) ? v.stages : [{days:'1', variants:[{title:'',body:''}]}];
+    const stageCards = stages.map((s,i)=>buildRetStageCard(i,s)).join('');
+    return `
+    <div style="font-size:11.5px;color:var(--t2);margin-bottom:12px;line-height:1.6">
+      Each stage fires after the set number of days without the student opening the app. The system picks one title + message pair at random. All stages reset when the student opens the app.
+    </div>
+    <div id="retStages">${stageCards}</div>
+    <div class="add-var" style="margin-top:4px" onclick="addRetStage()">＋ Add stage</div>`;
+  }
+
   if(ev.tc==='expiry') return `
     <div class="f-row c2"><div class="f-group">
       <label class="f-label">Days before expiry</label>
@@ -922,8 +985,8 @@ function tp(html) {
 }
 
 function buildLearnRuleCard(idx, rule) {
-  const titRows = (rule.titles||['']).map((t,i)=>lrVarRow(i,t,'title')).join('');
-  const bodRows = (rule.bodies||['']).map((b,i)=>lrVarRow(i,b,'body')).join('');
+  const vars = rule.variants || (rule.titles||['']).map((t,i)=>({title:t||'', body:(rule.bodies||[])[i]||''}));
+  const vpCards = vars.map((v,i)=>buildVP(i, v, {delFn:'delRuleVP', onUpdate:'updLearnPreview()', titlePH:'Toast title (optional)...', bodyPH:'Toast message body...'})).join('');
   const del = idx > 0
     ? `<div class="lr-del-btn" onclick="delLearnRule(this)" title="Remove rule">✕</div>`
     : `<div style="width:22px"></div>`;
@@ -946,40 +1009,20 @@ function buildLearnRuleCard(idx, rule) {
           </select>
         </div>
       </div>
-      <div class="f-row c2" style="gap:14px">
-        <div>
-          <div class="lr-sect">Title options <span style="font-weight:400;color:var(--t3);font-size:12px">(random pick)</span></div>
-          <div class="lr-var-list">${titRows}</div>
-          <div class="add-var" onclick="addLRVar(this,'title')">＋ Add title</div>
-        </div>
-        <div>
-          <div class="lr-sect">Message options <span style="font-weight:400;color:var(--t3);font-size:12px">(random pick)</span></div>
-          <div class="lr-var-list">${bodRows}</div>
-          <div class="add-var" onclick="addLRVar(this,'body')">＋ Add message</div>
-          <div class="chip-row" style="margin-top:8px">
-            <span class="chip" onclick="insLRVar(this,'{{count}}')" title="Insert variable">{{count}}</span>
-          </div>
-        </div>
+      <label class="f-label" style="margin-bottom:8px">Title &amp; Message Variants <span style="font-weight:400;color:var(--t3);font-size:12px">— system picks one pair randomly</span></label>
+      <div class="vp-list">${vpCards}</div>
+      <div class="add-var" onclick="addRuleVP(this,'learn')">＋ Add variant</div>
+      <div class="chip-row" style="margin-top:8px">
+        <span class="chip" onclick="insRuleVar(this,'{{count}}')" title="Insert variable">{{count}}</span>
       </div>
     </div>
-  </div>`;
-}
-
-function lrVarRow(idx, val, type) {
-  const del = idx > 0
-    ? `<div class="lr-var-del" onclick="delLRVar(this,'${type}')">✕</div>`
-    : `<div style="width:24px;flex-shrink:0"></div>`;
-  return `<div class="lr-var-row">
-    <div class="lr-var-n">${idx+1}</div>
-    <textarea placeholder="${type==='title'?'Toast title (optional)...':'Toast message body...'}" oninput="updLearnPreview()">${val||''}</textarea>
-    ${del}
   </div>`;
 }
 
 function addLearnRule() {
   const container = document.getElementById('learnRules');
   const idx = container.children.length;
-  const newRule = { count: String((idx+1)*5), type:'Correct / Wrong / Attempts', titles:[''], bodies:[''] };
+  const newRule = { count: String((idx+1)*5), type:'Correct / Wrong / Attempts', variants:[{title:'',body:''}] };
   const div = document.createElement('div');
   div.innerHTML = buildLearnRuleCard(idx, newRule);
   container.appendChild(div.firstElementChild);
@@ -1000,34 +1043,35 @@ function renumberLearnRules() {
   });
 }
 
-function addLRVar(btn, type) {
+function addRuleVP(btn, ruleType) {
   const card = btn.closest('.lr-card');
-  const list = type==='title' ? card.querySelectorAll('.lr-var-list')[0] : card.querySelectorAll('.lr-var-list')[1];
+  const list = card.querySelector('.vp-list');
   const idx = list.children.length;
+  const onUpdate = ruleType==='learn' ? 'updLearnPreview()' : 'updTestPreview()';
   const d = document.createElement('div');
-  d.innerHTML = lrVarRow(idx, '', type);
-  const row = d.firstElementChild;
-  list.appendChild(row);
-  row.querySelector('textarea').focus();
-  updLearnPreview();
+  d.innerHTML = buildVP(idx, {title:'',body:''}, {delFn:'delRuleVP', onUpdate});
+  list.appendChild(d.firstElementChild);
+  list.lastElementChild.querySelector('.vp-title').focus();
+  if(ruleType==='learn') updLearnPreview(); else updTestPreview();
 }
 
-function delLRVar(btn, type) {
+function delRuleVP(btn) {
   const card = btn.closest('.lr-card');
-  btn.closest('.lr-var-row').remove();
-  const list = type==='title' ? card.querySelectorAll('.lr-var-list')[0] : card.querySelectorAll('.lr-var-list')[1];
-  list.querySelectorAll('.lr-var-n').forEach((n,i)=>n.textContent=i+1);
-  updLearnPreview();
+  btn.closest('.vp-card').remove();
+  card.querySelectorAll('.vp-list .vp-badge').forEach((b,i)=>b.textContent=`Variant ${i+1}`);
+  if(card.closest('#learnRules')) updLearnPreview(); else updTestPreview();
 }
 
-function insLRVar(chip, v) {
+function insRuleVar(chip, v) {
   const card = chip.closest('.lr-card');
-  const last = [...card.querySelectorAll('.lr-var-list')[1].querySelectorAll('textarea')].pop();
-  if(!last) return;
-  const s=last.selectionStart, e=last.selectionEnd;
-  last.value=last.value.slice(0,s)+v+last.value.slice(e);
-  last.selectionStart=last.selectionEnd=s+v.length;
-  last.focus(); updLearnPreview();
+  const msgs = [...card.querySelectorAll('.vp-msg')];
+  const target = (lastVPMsg && card.contains(lastVPMsg)) ? lastVPMsg : msgs[msgs.length-1];
+  if(!target) return;
+  const s=target.selectionStart, e=target.selectionEnd;
+  target.value=target.value.slice(0,s)+v+target.value.slice(e);
+  target.selectionStart=target.selectionEnd=s+v.length;
+  target.focus();
+  if(card.closest('#learnRules')) updLearnPreview(); else updTestPreview();
 }
 
 function updLRSummary(input) {
@@ -1040,10 +1084,9 @@ function updLRSummary(input) {
 function updLearnPreview() {
   const cards = document.querySelectorAll('#learnRules .lr-card');
   if(!cards.length) return;
-  // Show first rule's first body in the preview panel
-  const firstBody = cards[0].querySelectorAll('.lr-var-list')[1]?.querySelector('textarea')?.value || 'Toast message...';
-  const firstTitle = cards[0].querySelectorAll('.lr-var-list')[0]?.querySelector('textarea')?.value || '';
-  const style = document.getElementById('fStyle')?.value || '';
+  const firstVP = cards[0].querySelector('.vp-card');
+  const firstTitle = firstVP?.querySelector('.vp-title')?.value || '';
+  const firstBody = firstVP?.querySelector('.vp-msg')?.value || 'Toast message...';
   const box = document.getElementById('pvBox');
   if(box) {
     box.innerHTML = `<div class="pv-toast">
@@ -1055,23 +1098,17 @@ function updLearnPreview() {
       </div>
     </div>`;
   }
-  // Update meta
-  const ruleCount = cards.length;
-  const allBodyCount = [...document.querySelectorAll('#learnRules .lr-var-list')].filter((_,i)=>i%2===1).reduce((a,l)=>a+l.querySelectorAll('textarea').length,0);
-  const vc = document.getElementById('pvVC');
-  if(vc) vc.textContent = `${ruleCount} rules · ${allBodyCount} variants`;
-  const pt = document.getElementById('pvTime');
-  if(pt) pt.textContent = '⚡ Event Time';
-  const ps = document.getElementById('pvStyle');
-  if(ps) ps.textContent = document.getElementById('fStyle')?.value||'In-App Toast';
-  const pa = document.getElementById('pvAud');
-  if(pa) pa.textContent = [...document.querySelectorAll('#audPills .pill.on')].map(p=>p.dataset.v).join(', ')||'All';
+  const allVPCount = document.querySelectorAll('#learnRules .vp-card').length;
+  const vc = document.getElementById('pvVC'); if(vc) vc.textContent = `${cards.length} rules · ${allVPCount} variants`;
+  const pt = document.getElementById('pvTime'); if(pt) pt.textContent = '⚡ Event Time';
+  const ps = document.getElementById('pvStyle'); if(ps) ps.textContent = document.getElementById('fStyle')?.value||'In-App Toast';
+  const pa = document.getElementById('pvAud'); if(pa) pa.textContent = [...document.querySelectorAll('#audPills .pill.on')].map(p=>p.dataset.v).join(', ')||'All';
 }
 
 // ── TEST SCORE RULE HELPERS ──────────────────────────────────
 function buildTestRuleCard(idx, rule) {
-  const titRows = (rule.titles||['']).map((t,i)=>lrVarRow(i,t,'title')).join('');
-  const bodRows = (rule.bodies||['']).map((b,i)=>lrVarRow(i,b,'body')).join('');
+  const vars = rule.variants || (rule.titles||['']).map((t,i)=>({title:t||'', body:(rule.bodies||[])[i]||''}));
+  const vpCards = vars.map((v,i)=>buildVP(i, v, {delFn:'delRuleVP', onUpdate:'updTestPreview()'})).join('');
   const ops = ['>=','<=','='];
   const opOpts = ops.map(o=>`<option${(rule.op||'>=')===o?' selected':''}>${o}</option>`).join('');
   const del = idx > 0
@@ -1094,22 +1131,13 @@ function buildTestRuleCard(idx, rule) {
           <input type="number" class="tr-score" value="${rule.score||'80'}" min="0" max="100" oninput="updTRSummary(this)">
         </div>
       </div>
-      <div class="f-row c2" style="gap:14px">
-        <div>
-          <div class="lr-sect">Title options <span style="font-weight:400;color:var(--t3);font-size:12px">(random pick)</span></div>
-          <div class="lr-var-list">${titRows}</div>
-          <div class="add-var" onclick="addTRVar(this,'title')">＋ Add title</div>
-        </div>
-        <div>
-          <div class="lr-sect">Message options <span style="font-weight:400;color:var(--t3);font-size:12px">(random pick)</span></div>
-          <div class="lr-var-list">${bodRows}</div>
-          <div class="add-var" onclick="addTRVar(this,'body')">＋ Add message</div>
-          <div class="chip-row" style="margin-top:7px">
-            <span class="chip" onclick="insTRVar(this,'{{score}}')" title="Insert">{{score}}</span>
-            <span class="chip" onclick="insTRVar(this,'{{testTitle}}')" title="Insert">{{testTitle}}</span>
-            <span class="chip" onclick="insTRVar(this,'{{testId}}')" title="Insert">{{testId}}</span>
-          </div>
-        </div>
+      <label class="f-label" style="margin-bottom:8px">Title &amp; Message Variants <span style="font-weight:400;color:var(--t3);font-size:12px">— system picks one pair randomly</span></label>
+      <div class="vp-list">${vpCards}</div>
+      <div class="add-var" onclick="addRuleVP(this,'test')">＋ Add variant</div>
+      <div class="chip-row" style="margin-top:7px">
+        <span class="chip" onclick="insRuleVar(this,'{{score}}')" title="Insert">{{score}}</span>
+        <span class="chip" onclick="insRuleVar(this,'{{testTitle}}')" title="Insert">{{testTitle}}</span>
+        <span class="chip" onclick="insRuleVar(this,'{{testId}}')" title="Insert">{{testId}}</span>
       </div>
     </div>
   </div>`;
@@ -1118,7 +1146,7 @@ function buildTestRuleCard(idx, rule) {
 function addTestRule() {
   const container = document.getElementById('testRules');
   const idx = container.children.length;
-  const newRule = { op:'>=', score:'30', titles:[''], bodies:[''] };
+  const newRule = { op:'>=', score:'30', variants:[{title:'',body:''}] };
   const div = document.createElement('div');
   div.innerHTML = buildTestRuleCard(idx, newRule);
   container.appendChild(div.firstElementChild);
@@ -1139,35 +1167,6 @@ function renumberTestRules() {
   });
 }
 
-function addTRVar(btn, type) {
-  const card = btn.closest('.lr-card');
-  const list = type==='title' ? card.querySelectorAll('.lr-var-list')[0] : card.querySelectorAll('.lr-var-list')[1];
-  const idx = list.children.length;
-  const div = document.createElement('div');
-  div.innerHTML = lrVarRow(idx, '', type);
-  list.appendChild(div.firstElementChild);
-  list.lastElementChild.querySelector('textarea').focus();
-  updTestPreview();
-}
-
-function delTRVar(btn, type) {
-  const card = btn.closest('.lr-card');
-  btn.closest('.lr-var-row').remove();
-  const list = type==='title' ? card.querySelectorAll('.lr-var-list')[0] : card.querySelectorAll('.lr-var-list')[1];
-  list.querySelectorAll('.lr-var-n').forEach((n,i)=>n.textContent=i+1);
-  updTestPreview();
-}
-
-function insTRVar(chip, v) {
-  const card = chip.closest('.lr-card');
-  const last = [...card.querySelectorAll('.lr-var-list')[1].querySelectorAll('textarea')].pop();
-  if(!last) return;
-  const s=last.selectionStart, e=last.selectionEnd;
-  last.value=last.value.slice(0,s)+v+last.value.slice(e);
-  last.selectionStart=last.selectionEnd=s+v.length;
-  last.focus(); updTestPreview();
-}
-
 function updTRSummary(input) {
   const card = input.closest('.lr-card');
   const op = card.querySelector('.tr-op').value;
@@ -1178,8 +1177,9 @@ function updTRSummary(input) {
 function updTestPreview() {
   const cards = document.querySelectorAll('#testRules .lr-card');
   if(!cards.length) return;
-  const firstBody = cards[0].querySelectorAll('.lr-var-list')[1]?.querySelector('textarea')?.value || 'Result message...';
-  const firstTitle = cards[0].querySelectorAll('.lr-var-list')[0]?.querySelector('textarea')?.value || '';
+  const firstVP = cards[0].querySelector('.vp-card');
+  const firstTitle = firstVP?.querySelector('.vp-title')?.value || '';
+  const firstBody = firstVP?.querySelector('.vp-msg')?.value || 'Result message...';
   const cta = document.getElementById('fCTA')?.value || 'ফলাফল দেখো';
   const box = document.getElementById('pvBox');
   if(box) {
@@ -1190,12 +1190,150 @@ function updTestPreview() {
       ${cta?`<div class="pv-splash-cta">${cta}</div>`:''}
     </div>`;
   }
-  const allBodyCount = [...document.querySelectorAll('#testRules .lr-var-list')].filter((_,i)=>i%2===1).reduce((a,l)=>a+l.querySelectorAll('textarea').length,0);
-  const vc = document.getElementById('pvVC');
-  if(vc) vc.textContent = `${cards.length} rules · ${allBodyCount} variants`;
+  const allVPCount = document.querySelectorAll('#testRules .vp-card').length;
+  const vc = document.getElementById('pvVC'); if(vc) vc.textContent = `${cards.length} rules · ${allVPCount} variants`;
   const pt = document.getElementById('pvTime'); if(pt) pt.textContent='⚡ Event Time';
   const ps = document.getElementById('pvStyle'); if(ps) ps.textContent=document.getElementById('fStyle')?.value||'Splash Screen';
   const pa = document.getElementById('pvAud'); if(pa) pa.textContent=[...document.querySelectorAll('#audPills .pill.on')].map(p=>p.dataset.v).join(', ')||'All';
+}
+
+// ── VARIANT PAIR HELPERS ──────────────────────────────────────
+let lastVPMsg = null;
+
+function buildVP(idx, v, opts) {
+  opts = opts || {};
+  const delBtn = idx > 0
+    ? `<div class="vp-del" onclick="${opts.delFn||'delVP'}(this)">✕</div>`
+    : `<div style="width:24px;flex-shrink:0"></div>`;
+  const onInput = opts.onUpdate || 'updatePreview()';
+  return `<div class="vp-card">
+    <div class="vp-head"><span class="vp-badge">Variant ${idx+1}</span>${delBtn}</div>
+    <div class="vp-content">
+      <label class="vp-lbl">Title</label>
+      <input type="text" class="vp-title" placeholder="${opts.titlePH||'Notification title...'}" value="${(v&&v.title)||''}" oninput="${onInput}">
+      <label class="vp-lbl" style="margin-top:10px">Message</label>
+      <textarea class="vp-msg" placeholder="${opts.bodyPH||'Message body...'}" oninput="${onInput}" onfocus="lastVPMsg=this">${(v&&v.body)||''}</textarea>
+    </div>
+  </div>`;
+}
+
+function addVP() {
+  const list = document.getElementById('vpList');
+  const idx = list.children.length;
+  const d = document.createElement('div');
+  d.innerHTML = buildVP(idx, {title:'',body:''});
+  list.appendChild(d.firstElementChild);
+  list.lastElementChild.querySelector('.vp-title').focus();
+  updatePreview();
+}
+
+function delVP(btn) {
+  const list = document.getElementById('vpList');
+  btn.closest('.vp-card').remove();
+  list.querySelectorAll('.vp-badge').forEach((b,i)=>b.textContent=`Variant ${i+1}`);
+  updatePreview();
+}
+
+// ── RETENTION STAGE HELPERS ──────────────────────────────────
+function buildRetStageCard(idx, stage) {
+  const vars = stage.variants || [{title:'',body:''}];
+  const vpCards = vars.map((v,i)=>buildVP(i, v, {delFn:'delRetVP', onUpdate:'updRetentionPreview()'})).join('');
+  const del = idx > 0
+    ? `<div class="lr-del-btn" onclick="delRetStage(this)" title="Remove stage">✕</div>`
+    : `<div style="width:22px"></div>`;
+  return `<div class="lr-card ret-stage-card">
+    <div class="lr-head">
+      <span class="lr-badge">Stage ${idx+1}</span>
+      <span class="lr-summary">After <b>${stage.days||'?'}</b> days inactive</span>
+      ${del}
+    </div>
+    <div class="lr-body">
+      <div class="lr-trigger-row" style="grid-template-columns:130px 1fr">
+        <div class="f-group" style="margin:0">
+          <label class="f-label">Inactive days</label>
+          <input type="number" class="ret-days" value="${stage.days||'1'}" min="1" oninput="updRetStageSummary(this)">
+        </div>
+        <div class="f-group" style="margin:0;display:flex;align-items:flex-end;padding-bottom:2px">
+          <div class="f-hint" style="margin:0">Days without opening the app before this stage fires.</div>
+        </div>
+      </div>
+      <label class="f-label" style="margin-bottom:8px">Title &amp; Message Variants <span style="font-weight:400;color:var(--t3);font-size:12px">— system picks one pair randomly</span></label>
+      <div class="vp-list">${vpCards}</div>
+      <div class="add-var" onclick="addRetVP(this)">＋ Add variant</div>
+    </div>
+  </div>`;
+}
+
+function addRetStage() {
+  const container = document.getElementById('retStages');
+  const idx = container.children.length;
+  const defaultDays = [1,3,7,14,21,30];
+  const newStage = { days: String(defaultDays[idx]||30), variants:[{title:'',body:''}] };
+  const d = document.createElement('div');
+  d.innerHTML = buildRetStageCard(idx, newStage);
+  container.appendChild(d.firstElementChild);
+  renumberRetStages();
+  updRetentionPreview();
+}
+
+function delRetStage(btn) {
+  if(document.querySelectorAll('#retStages .ret-stage-card').length <= 1) return;
+  btn.closest('.ret-stage-card').remove();
+  renumberRetStages();
+  updRetentionPreview();
+}
+
+function renumberRetStages() {
+  document.querySelectorAll('#retStages .ret-stage-card').forEach((c,i)=>{
+    c.querySelector('.lr-badge').textContent = `Stage ${i+1}`;
+  });
+}
+
+function updRetStageSummary(input) {
+  const card = input.closest('.ret-stage-card');
+  const days = input.value || '?';
+  card.querySelector('.lr-summary').innerHTML = `After <b>${days}</b> days inactive`;
+}
+
+function addRetVP(btn) {
+  const card = btn.closest('.ret-stage-card');
+  const list = card.querySelector('.vp-list');
+  const idx = list.children.length;
+  const d = document.createElement('div');
+  d.innerHTML = buildVP(idx, {title:'',body:''}, {delFn:'delRetVP', onUpdate:'updRetentionPreview()'});
+  list.appendChild(d.firstElementChild);
+  list.lastElementChild.querySelector('.vp-title').focus();
+  updRetentionPreview();
+}
+
+function delRetVP(btn) {
+  const card = btn.closest('.ret-stage-card');
+  btn.closest('.vp-card').remove();
+  card.querySelectorAll('.vp-list .vp-badge').forEach((b,i)=>b.textContent=`Variant ${i+1}`);
+  updRetentionPreview();
+}
+
+function updRetentionPreview() {
+  const cards = document.querySelectorAll('#retStages .ret-stage-card');
+  if(!cards.length) return;
+  const firstVP = cards[0].querySelector('.vp-card');
+  const firstTitle = firstVP?.querySelector('.vp-title')?.value || '';
+  const firstBody = firstVP?.querySelector('.vp-msg')?.value || 'Retention message...';
+  const cta = document.getElementById('fCTA')?.value || '';
+  const box = document.getElementById('pvBox');
+  if(box) {
+    box.innerHTML = `<div class="pv-push">
+      <div class="pv-push-top"><div class="pv-app-ico">B</div><div class="pv-app-name">Brritto</div><div class="pv-app-time">now</div></div>
+      <div class="pv-push-title">${firstTitle||'Retention message...'}</div>
+      <div class="pv-push-body">${firstBody}</div>
+      ${cta?`<div class="pv-cta">${cta}</div>`:''}
+    </div>`;
+  }
+  const allVPCount = document.querySelectorAll('#retStages .vp-card').length;
+  const vc = document.getElementById('pvVC'); if(vc) vc.textContent = `${cards.length} stages · ${allVPCount} variants`;
+  const pt = document.getElementById('pvTime'); if(pt) pt.textContent = 'Based on inactive days';
+  const ps = document.getElementById('pvStyle'); if(ps) ps.textContent = document.getElementById('fStyle')?.value||'Push';
+  const pa = document.getElementById('pvAud'); if(pa) pa.textContent = [...document.querySelectorAll('#audPills .pill.on')].map(p=>p.dataset.v).join(', ')||'All';
 }
 
 function updTP() {
@@ -1205,35 +1343,13 @@ function updTP() {
   if(ev.tc==='days_signup') up('tp1',g('tf1'));
   if(ev.tc==='learn'){updLearnPreview();return;}
   if(ev.tc==='test_score'){updTestPreview();return;}
+  if(ev.tc==='retention_stages'){updRetentionPreview();return;}
   if(ev.tc==='exam_hours'){up('tp1',g('tf1'));up('tp2',g('tf2'));}
   if(ev.tc==='interval'){up('tp1',g('tf1'));up('tp2',g('tf2'));}
   if(ev.tc==='inactive') up('tp1',g('tf1'));
   if(ev.tc==='expiry') up('tp1',g('tf1'));
   if(ev.tc==='trial_exp') up('tp1',g('tf1'));
   if(ev.tc==='trial_offer') up('tp1',g('tf1'));
-}
-
-function vRow(type,idx,val) {
-  const del=idx>0?`<div class="var-del" onclick="delVar(this,'${type}')">✕</div>`:`<div style="width:26px;flex-shrink:0"></div>`;
-  return `<div class="var-row"><div class="var-n">${idx+1}</div><textarea placeholder="${type==='ttl'?'Notification title...':'Message body...'}" oninput="updatePreview()">${val||''}</textarea>${del}</div>`;
-}
-
-function addVar(type) {
-  const c=document.getElementById(type+'Vars');
-  const idx=c.children.length;
-  const d=document.createElement('div');
-  d.className='var-row';
-  d.innerHTML=`<div class="var-n">${idx+1}</div><textarea placeholder="${type==='ttl'?'Notification title...':'Message body...'}" oninput="updatePreview()"></textarea><div class="var-del" onclick="delVar(this,'${type}')">✕</div>`;
-  c.appendChild(d);
-  d.querySelector('textarea').addEventListener('input',updatePreview);
-  d.querySelector('textarea').focus();
-  updatePreview();
-}
-
-function delVar(btn,type) {
-  btn.parentElement.remove();
-  document.querySelectorAll(`#${type}Vars .var-n`).forEach((n,i)=>n.textContent=i+1);
-  updatePreview();
 }
 
 function tPill(el) {
@@ -1298,12 +1414,13 @@ function setPhase(p) {
 }
 
 function insVar(v) {
-  const last=[...document.querySelectorAll('#bdyVars textarea')].pop();
-  if(!last) return;
-  const s=last.selectionStart,e=last.selectionEnd;
-  last.value=last.value.slice(0,s)+v+last.value.slice(e);
-  last.selectionStart=last.selectionEnd=s+v.length;
-  last.focus(); updatePreview();
+  const msgs=[...document.querySelectorAll('#vpList .vp-msg')];
+  const target=(lastVPMsg&&document.getElementById('vpList')?.contains(lastVPMsg))?lastVPMsg:msgs[msgs.length-1];
+  if(!target) return;
+  const s=target.selectionStart,e=target.selectionEnd;
+  target.value=target.value.slice(0,s)+v+target.value.slice(e);
+  target.selectionStart=target.selectionEnd=s+v.length;
+  target.focus(); updatePreview();
 }
 
 // ═══════════════════════ PREVIEW ═══════════════════════
@@ -1311,13 +1428,14 @@ function updatePreview() {
   const ev=EVENTS.find(e=>e.id===curId);
   if(ev&&ev.tc==='learn'){updLearnPreview();return;}
   if(ev&&ev.tc==='test_score'){updTestPreview();return;}
-  const title=document.querySelector('#ttlVars textarea')?.value||'';
-  const body=document.querySelector('#bdyVars textarea')?.value||'';
+  if(ev&&ev.tc==='retention_stages'){updRetentionPreview();return;}
+  const title=document.querySelector('#vpList .vp-title')?.value||'';
+  const body=document.querySelector('#vpList .vp-msg')?.value||'';
   const cta=document.getElementById('fCTA')?.value||'';
   const style=document.getElementById('fStyle')?.value||'';
   const dl=document.getElementById('fDL')?.value||'';
   const aud=[...document.querySelectorAll('#audPills .pill.on')].map(p=>p.dataset.v).join(', ')||'All';
-  const bCount=document.querySelectorAll('#bdyVars textarea').length;
+  const bCount=document.querySelectorAll('#vpList .vp-card').length;
   const isSet=document.getElementById('tSet')?.classList.contains('on-set');
   let timing='⚡ Event Time';
   if(isSet) {
@@ -1330,7 +1448,7 @@ function updatePreview() {
   document.getElementById('pvAud').textContent=aud;
   document.getElementById('pvTime').textContent=timing;
   document.getElementById('pvDL').textContent=dl||'—';
-  document.getElementById('pvVC').textContent=bCount+' variant'+(bCount!==1?'s':'');
+  document.getElementById('pvVC').textContent=bCount+' variant pair'+(bCount!==1?'s':'');
 
   const tTxt=title||'Notification title...';
   const bTxt=body||'Message body here...';
@@ -1353,26 +1471,33 @@ function saveEvt() {
     const v=ev.tv;
     if(ev.tc==='days_signup') v.days=g('tf1');
     if(ev.tc==='learn'){
-      v.rules=[...document.querySelectorAll('#learnRules .lr-card')].map(card=>{
-        const lists=card.querySelectorAll('.lr-var-list');
-        return {
-          count:card.querySelector('.lr-count').value,
-          type:card.querySelector('.lr-type').value,
-          titles:[...lists[0].querySelectorAll('textarea')].map(t=>t.value).filter(Boolean),
-          bodies:[...lists[1].querySelectorAll('textarea')].map(t=>t.value).filter(Boolean),
-        };
-      });
+      v.rules=[...document.querySelectorAll('#learnRules .lr-card')].map(card=>({
+        count:card.querySelector('.lr-count').value,
+        type:card.querySelector('.lr-type').value,
+        variants:[...card.querySelectorAll('.vp-card')].map(vc=>({
+          title:vc.querySelector('.vp-title').value,
+          body:vc.querySelector('.vp-msg').value
+        })).filter(vp=>vp.title||vp.body),
+      }));
     }
     if(ev.tc==='test_score'){
-      v.rules=[...document.querySelectorAll('#testRules .lr-card')].map(card=>{
-        const lists=card.querySelectorAll('.lr-var-list');
-        return {
-          op:card.querySelector('.tr-op').value,
-          score:card.querySelector('.tr-score').value,
-          titles:[...lists[0].querySelectorAll('textarea')].map(t=>t.value).filter(Boolean),
-          bodies:[...lists[1].querySelectorAll('textarea')].map(t=>t.value).filter(Boolean),
-        };
-      });
+      v.rules=[...document.querySelectorAll('#testRules .lr-card')].map(card=>({
+        op:card.querySelector('.tr-op').value,
+        score:card.querySelector('.tr-score').value,
+        variants:[...card.querySelectorAll('.vp-card')].map(vc=>({
+          title:vc.querySelector('.vp-title').value,
+          body:vc.querySelector('.vp-msg').value
+        })).filter(vp=>vp.title||vp.body),
+      }));
+    }
+    if(ev.tc==='retention_stages'){
+      v.stages=[...document.querySelectorAll('#retStages .ret-stage-card')].map(card=>({
+        days:card.querySelector('.ret-days').value,
+        variants:[...card.querySelectorAll('.vp-card')].map(vc=>({
+          title:vc.querySelector('.vp-title').value,
+          body:vc.querySelector('.vp-msg').value
+        })).filter(vp=>vp.title||vp.body),
+      }));
     }
     if(ev.tc==='exam_hours'){v.hours=g('tf1');v.dir=g('tf2');}
     if(ev.tc==='interval'){v.days=g('tf1');v.unit=g('tf2');}
@@ -1388,11 +1513,13 @@ function saveEvt() {
   ev.appearTime=document.getElementById('tSet')?.classList.contains('on-set')?'set':'event';
   ev.scheduleVal=g('fSchedVal');
   ev.scheduleUnit=g('fSchedUnit');
-  ev.titles=[...document.querySelectorAll('#ttlVars textarea')].map(t=>t.value).filter(Boolean);
-  ev.bodies=[...document.querySelectorAll('#bdyVars textarea')].map(t=>t.value).filter(Boolean);
+  ev.variants=[...document.querySelectorAll('#vpList .vp-card')].map(vc=>({
+    title:vc.querySelector('.vp-title').value,
+    body:vc.querySelector('.vp-msg').value
+  })).filter(vp=>vp.title||vp.body);
   ev.cta=g('fCTA'); ev.dl=g('fDL')||ev.dl;
-  const isRuleBased = ev.tc==='learn' || ev.tc==='test_score';
-  if(!isRuleBased && !ev.bodies.length){toast('Add at least one message body','err');return;}
+  const isRuleBased = ev.tc==='learn' || ev.tc==='test_score' || ev.tc==='retention_stages';
+  if(!isRuleBased && !ev.variants.length){toast('Add at least one title + message pair','err');return;}
   toast('Configuration saved!','ok');
 }
 
